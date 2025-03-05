@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as fs from 'fs';
+require('dotenv').config();
 
 async function bootstrap() {
   const httpsOptions = {
@@ -13,15 +14,17 @@ async function bootstrap() {
 
   // Swagger
   const config = new DocumentBuilder()
-    .setTitle('Cats example')
-    .setDescription('The cats API description')
+    .setTitle('Inventory System API')
+    .setDescription('TODO - API description')
     .setVersion('1.0')
-    .addTag('cats')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
 
-  await app.listen(3000);
+  const port = Number.parseInt(process.env.APP_PORT as string);
+  console.log('Running on: https://localhost:' + port);
+  console.log('Running on: https://localhost:' + port + '/swagger');
+  await app.listen(port);
 }
 bootstrap();

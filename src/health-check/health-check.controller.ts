@@ -1,12 +1,16 @@
 import { Controller, Get } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('healthcheck')
 @Controller('healthcheck')
 export class HealthCheckController {
+
   @Get()
   get(): any {
     return {
       status: 'ok',
-      datetime: new Date(),
+      utc: new Date().toISOString(),
+      local: new Date().toLocaleString(),
     };
   }
 }

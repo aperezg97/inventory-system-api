@@ -76,3 +76,14 @@ Nest is [MIT licensed](LICENSE).
 
 https://rehansattar.dev/creating-a-local-https-nestjs-server-with-free-ssl-certificates-a-step-by-step-guide
 
+## Drizzle migrations
+
+- To specify the migration name
+```bash
+npm run generate-migration -- --name=migration_name
+```
+
+- To create an empty migration
+```bash
+npm run generate-migration -- --custom
+```
