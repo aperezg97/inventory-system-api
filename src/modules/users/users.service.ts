@@ -6,6 +6,7 @@ import * as schema from 'src/core/db/schema';
 import { InsertUserType } from 'src/core/db/schema.types';
 import { User } from 'src/core/models';
 import { uuid } from 'drizzle-orm/pg-core';
+import { count, gt } from 'drizzle-orm';
 
 @Injectable()
 export class UsersService {
@@ -32,11 +33,21 @@ export class UsersService {
   }
 
   async insert(user: User): Promise<User | undefined> {
+    const userExists = (await db
+    .select({ count: count() })
+    .from(schema.usersTable)
+    .where(eq(schema.usersTable.email, user.email)))[0];
+      console.log({userExists});
+    if (userExists.count > 0) {
+      throw new Error('User with email "'+user.email+'" already exists!');
+    }
+
     user.created_at = new Date();
     user.updated_at = new Date();
 
     const userData = user as any as InsertUserType;
     userData.id = undefined;
+    userData.isActive = true;
 
     let result = db.insert(schema.usersTable)
     .values(userData)
