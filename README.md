@@ -78,6 +78,11 @@ https://rehansattar.dev/creating-a-local-https-nestjs-server-with-free-ssl-certi
 
 ## Drizzle migrations
 
+- To run migrations
+```bash
+npm run migrate
+```
+
 - To specify the migration name
 ```bash
 npm run generate-migration -- --name=migration_name

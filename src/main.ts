@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as fs from 'fs';
+import { DatabaseService } from 'src/modules/database/database.service';
 require('dotenv').config();
 
 async function bootstrap() {
@@ -23,8 +24,25 @@ async function bootstrap() {
   SwaggerModule.setup('swagger', app, document);
 
   const port = Number.parseInt(process.env.APP_PORT as string);
-  console.log('Running on: https://localhost:' + port);
-  console.log('Running on: https://localhost:' + port + '/swagger');
-  await app.listen(port);
+  await app.listen(port).then(async () => {
+    console.log('Running on: https://localhost:' + port);
+    console.log('Running on: https://localhost:' + port + '/swagger');
+    try {
+      console.log('Connecting to database:');
+      const dbService = new DatabaseService();
+      const result = await dbService.checkDatabaseHealth();
+      console.log('Connnected - ', {
+        status: result,
+        exception: null,
+        datetime: new Date().toISOString(),
+      });
+    } catch(ex) {
+      console.log({
+        status: 'error',
+        exception: ex,
+        datetime: new Date().toISOString(),
+      });
+    }
+  });
 }
 bootstrap();

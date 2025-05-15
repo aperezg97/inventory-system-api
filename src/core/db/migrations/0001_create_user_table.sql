@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"created_by" uuid,
 	"updated_at" date NOT NULL,
 	"updated_by" uuid,
-	CONSTRAINT "users_id_unique" UNIQUE("id")
+	CONSTRAINT "users_id_unique" UNIQUE("id"),
+	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 DO $$ BEGIN

@@ -7,6 +7,7 @@ import {
   Request,
   Get,
   UseGuards,
+  HttpException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
@@ -37,8 +38,15 @@ export class AuthController {
       firstName: 'Alex', lastName: 'Perez', email: 'test@test.com', created_at: new Date(), updated_at: new Date(), username: 'alex', password: 'alexperez'
     } as UserDTO } as ExampleObject,
   } as ExamplesObject })
-  register(@Body() user: UserDTO) {
-    return this.authService.register(user);
+  async register(@Body() user: UserDTO) {
+    try {
+      const result = await this.authService.register(user);
+      console.log({result});
+      return result;
+    } catch(ex) {
+      console.log('catch', {ex});
+      throw new HttpException(ex.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   @UseGuards(AuthGuard)
