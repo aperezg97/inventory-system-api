@@ -3,15 +3,17 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as fs from 'fs';
 import { DatabaseService } from 'src/modules/database/database.service';
+import { NestApplicationOptions } from '@nestjs/common';
 require('dotenv').config();
 
 async function bootstrap() {
   const httpsOptions = {
     key: fs.readFileSync('./src/cert/key.pem'),
     cert: fs.readFileSync('./src/cert/cert.pem'),
-  };
+    cors: true,
+  } as NestApplicationOptions;
 
-  const app = await NestFactory.create(AppModule, { httpsOptions });
+  const app = await NestFactory.create(AppModule, httpsOptions);
 
   // Swagger
   const config = new DocumentBuilder()

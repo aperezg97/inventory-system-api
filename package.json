@@ -16,7 +16,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "generate-migration": "drizzle-kit generate --config=src/core/db/drizzle.config.ts",
     "migrate": "ts-node src/core/db/migrate",
-    "start": "nest start",
+    "start": "npm run start:dev",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",

@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { HealthCheckController } from './health-check/health-check.controller';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { HealthCheckModule } from 'src/health-check/health-check.module';

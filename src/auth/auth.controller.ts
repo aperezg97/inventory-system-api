@@ -15,7 +15,7 @@ import { AuthGuard } from './auth.guard';
 import { LoginDTO, UserDTO } from 'src/core/dtos';
 import { ExampleObject, ExamplesObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 
-@Controller('auth')
+@Controller('api/auth')
 @ApiTags('Auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
