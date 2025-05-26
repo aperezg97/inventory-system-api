@@ -4,7 +4,8 @@ export class User {
     lastName: string;
     email: string;
     username: string;
-    password: string;
+    password: string | undefined;
+    isActive: boolean;
     created_at: Date;
     created_by: string;
     updated_at: Date;

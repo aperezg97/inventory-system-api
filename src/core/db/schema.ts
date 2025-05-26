@@ -1,4 +1,4 @@
-import { pgTable, varchar, date, AnyPgColumn, uuid, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, varchar, timestamp, AnyPgColumn, uuid, boolean, index } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // enable Postgres extension for UUID generation
@@ -12,9 +12,9 @@ export const usersTable = pgTable("users", {
   username: varchar("username", { length: 100 }).notNull(),
   password: varchar("password", { length: 256 }).notNull(),
   isActive: boolean("is_active").default(false),
-  created_at: date("created_at").notNull(),
+  created_at: timestamp("created_at").notNull().defaultNow(),
   created_by: uuid("created_by").references((): AnyPgColumn => usersTable.id),
-  updated_at: date("updated_at").notNull(),
+  updated_at: timestamp("updated_at").notNull().defaultNow(),
   updated_by: uuid("updated_by").references((): AnyPgColumn => usersTable.id),
 }, (table) => ({
   // l2: index('l2_index').using('hnsw', table.id.op('vector_l2_ops'))
