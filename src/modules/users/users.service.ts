@@ -14,12 +14,37 @@ export class UsersService {
 
   async findByUsername(username: string): Promise<User | undefined> {
     let result: [User] = (await db
-      .select()
+      .select({
+        id: schema.usersTable.id,
+        firstName: schema.usersTable.firstName,
+        lastName: schema.usersTable.lastName,
+        email: schema.usersTable.email,
+        username: schema.usersTable.username,
+        password: schema.usersTable.password,
+        isActive: schema.usersTable.isActive,
+        created_at: schema.usersTable.created_at,
+        created_by: schema.usersTable.created_by,
+        updated_at: schema.usersTable.updated_at,
+        updated_by: schema.usersTable.updated_by,
+      })
       .from(schema.usersTable)
       .where(eq(schema.usersTable.username, username))
       .limit(1)) as [any] as [User];
 
     const resultFirst = await dbQuerySyntax.query.usersTable.findFirst({
+      columns: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        username: true,
+        isActive: true,
+        created_at: true,
+        created_by: true,
+        updated_at: true,
+        updated_by: true,
+        password: false,
+      },
       where: eq(schema.usersTable.username, username),
       with: {
         createdBy: true,
@@ -28,7 +53,7 @@ export class UsersService {
 
     console.log({ result, resultFirst });
 
-    return result && result.length ? result[0] : undefined;
+    return result && result.length > 0 ? result[0] : undefined;
   }
 
   async findAll(): Promise<User[]> {
@@ -61,7 +86,7 @@ export class UsersService {
       .select({ count: count() })
       .from(schema.usersTable)
       .where(
-        or(eq(schema.usersTable.email, user.email), eq(schema.usersTable.username, user.username)),
+        or(eq(schema.usersTable.email, user.email.toLowerCase()), eq(schema.usersTable.username, user.username.toLowerCase())),
       ))[0];
     if (userExists.count > 0) {
       throw new BadRequestException('User with that email or username already exists!');
@@ -71,6 +96,8 @@ export class UsersService {
     user.updated_at = new Date();
 
     const userData = user as any as InsertUserType;
+    userData.email = userData.email?.toLowerCase();
+    userData.username = userData.username?.toLowerCase();
     userData.id = undefined;
     userData.isActive = true;
 
@@ -87,6 +114,9 @@ export class UsersService {
   }
 
   async update(user: User): Promise<boolean | undefined> {
+    if (!user.username) {
+      throw new BadRequestException('Username is required!');
+    }
     const existingUser = await dbQuerySyntax.query.usersTable.findFirst({ where: eq(schema.usersTable.id, user.id), }) as User;
     if (!existingUser) {
       throw new BadRequestException('User with ID: ' + user.id + ' does not exist!');
@@ -95,7 +125,7 @@ export class UsersService {
     const toUpdate = {
       firstName: user.firstName,
       lastName: user.lastName,
-      email: user.email,
+      email: user.email.toLowerCase(),
       password: user.password,
       updated_at: new Date(),
     };

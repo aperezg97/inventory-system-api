@@ -6,6 +6,7 @@ import { AuthGuard } from "src/auth/auth.guard";
 import { HttpResponseModel, ToggleStatusModel, UserDTO } from "src/core/dtos";
 import { User } from "src/core/models";
 import { boolean } from "drizzle-orm/gel-core";
+import { randomUUID } from "crypto";
 
 @Controller('api/users')
 @ApiTags('Users')
@@ -17,8 +18,19 @@ export class UsersController {
     @ApiBearerAuth()
     async getAll(@Request() req: any) {
         const users = await this.usersService.findAll();
+        for (let index = 0; index < 100; index++) {
+            users.push(this.generateUser(index));
+        }
         return HttpResponseModel.okResponse<User[]>(users);
     }
+
+    generateUser(index: number) {
+        return {
+            id: randomUUID().toString(),
+            firstName: 'User #' + index,
+            lastName: 'Demo',
+        } as any as User;
+    };
 
     @Get('/:id')
     @UseGuards(AuthGuard)
@@ -29,6 +41,16 @@ export class UsersController {
             return HttpResponseModel.okResponse<User>(user);
         }
         return HttpResponseModel.notFoundResponse('User not found');
+    }
+
+    @Post()
+    @UseGuards(AuthGuard)
+    @ApiBearerAuth()
+    @ApiBody({ type: UserDTO })
+    @ApiResponse({ type: UserDTO })
+    async save(@Body() user: User) {
+        const result = await this.usersService.insert(user);
+        return HttpResponseModel.okResponse(result);
     }
 
     @Put()
