@@ -6,9 +6,9 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"username" varchar(100) NOT NULL,
 	"password" varchar(256) NOT NULL,
 	"is_active" boolean DEFAULT false,
-	"created_at" date NOT NULL,
+	"created_at" timestamp NOT NULL DEFAULT now(),
 	"created_by" uuid,
-	"updated_at" date NOT NULL,
+	"updated_at" timestamp NOT NULL DEFAULT now(),
 	"updated_by" uuid,
 	CONSTRAINT "users_id_unique" UNIQUE("id"),
 	CONSTRAINT "users_email_unique" UNIQUE("email")

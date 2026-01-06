@@ -3,15 +3,21 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as fs from 'fs';
 import { DatabaseService } from 'src/modules/database/database.service';
+import { NestApplicationOptions } from '@nestjs/common'; // NestInterceptor
+import { ErrorsInterceptor, ResponseInterceptor } from './core/interceptors';
 require('dotenv').config();
 
 async function bootstrap() {
   const httpsOptions = {
     key: fs.readFileSync('./src/cert/key.pem'),
     cert: fs.readFileSync('./src/cert/cert.pem'),
-  };
+    cors: true,
+  } as NestApplicationOptions;
 
-  const app = await NestFactory.create(AppModule, { httpsOptions });
+  const app = await NestFactory.create(AppModule, httpsOptions);
+
+  app.useGlobalInterceptors(new ErrorsInterceptor());
+  app.useGlobalInterceptors(new ResponseInterceptor());
 
   // Swagger
   const config = new DocumentBuilder()
