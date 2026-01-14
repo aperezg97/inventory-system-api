@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { HealthCheckModule } from 'src/health-check/health-check.module';
+
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './auth/constants';
 

@@ -12,6 +12,16 @@ import { ToggleStatusModel } from 'src/core/dtos';
 @Injectable()
 export class UsersService {
 
+  async findOne(username: string): Promise<User | undefined> {
+    let result: [User] = (await db
+      .select()
+      .from(schema.usersTable)
+      .where(eq(schema.usersTable.username, username))
+      .limit(1)) as [any] as [User];
+      console.log({result});
+      return result?.length ? result[0] : undefined;
+  }
+
   async findByUsername(username: string): Promise<User | undefined> {
     let result: [User] = (await db
       .select({
@@ -33,6 +43,8 @@ export class UsersService {
       )
       // .where(eq(schema.usersTable.username, username))
       .limit(1)) as [any] as [User];
+
+    console.log({result});
 
     const resultFirst = await dbQuerySyntax.query.usersTable.findFirst({
       columns: {
@@ -56,7 +68,7 @@ export class UsersService {
 
     console.log({ result, resultFirst });
 
-    return result && result.length > 0 ? result[0] : undefined;
+    return result?.length ? result[0] : undefined;
   }
 
   async findAll(): Promise<User[]> {

@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as fs from 'fs';
 import { DatabaseService } from 'src/modules/database/database.service';
-import { NestApplicationOptions, NestInterceptor } from '@nestjs/common';
+import { NestApplicationOptions } from '@nestjs/common'; // NestInterceptor
 import { ErrorsInterceptor, ResponseInterceptor } from './core/interceptors';
 require('dotenv').config();
 

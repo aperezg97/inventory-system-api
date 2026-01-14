@@ -22,7 +22,8 @@ import { AuthUserProfile } from 'src/core/dtos/auth-user-profile.model';
 @Controller('api/auth')
 @ApiTags('Auth')
 export class AuthController {
-  constructor(private authService: AuthService,
+  constructor(
+    private authService: AuthService,
     private usersService: UsersService
   ) {}
 
@@ -46,8 +47,10 @@ export class AuthController {
   async register(@Body() user: UserDTO) {
     try {
       const result = await this.authService.register(new UserDTO().toUser(user));
+      console.log({result});
       return result;
     } catch(ex) {
+      console.log('catch', {ex});
       throw new HttpException(ex.message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
