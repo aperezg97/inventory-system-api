@@ -28,7 +28,10 @@ export class UsersService {
         updated_by: schema.usersTable.updated_by,
       })
       .from(schema.usersTable)
-      .where(eq(schema.usersTable.username, username))
+      .where(
+        or(eq(schema.usersTable.email, username.toLowerCase()), eq(schema.usersTable.username, username.toLowerCase()))
+      )
+      // .where(eq(schema.usersTable.username, username))
       .limit(1)) as [any] as [User];
 
     const resultFirst = await dbQuerySyntax.query.usersTable.findFirst({
@@ -45,7 +48,7 @@ export class UsersService {
         updated_by: true,
         password: false,
       },
-      where: eq(schema.usersTable.username, username),
+      where: or(eq(schema.usersTable.email, username.toLowerCase()), eq(schema.usersTable.username, username.toLowerCase())),
       with: {
         createdBy: true,
       },

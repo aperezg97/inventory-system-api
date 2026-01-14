@@ -12,14 +12,19 @@ import {
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from './auth.guard';
-import { LoginDTO, UserDTO } from 'src/core/dtos';
+import { HttpResponseModel, LoginDTO, UserDTO } from 'src/core/dtos';
 import { ExampleObject, ExamplesObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import { User } from 'src/core/models';
+import { LoginResponseDTO } from 'src/core/dtos/login-response.model';
+import { UsersService } from 'src/modules/users/users.service';
+import { AuthUserProfile } from 'src/core/dtos/auth-user-profile.model';
 
 @Controller('api/auth')
 @ApiTags('Auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService,
+    private usersService: UsersService
+  ) {}
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
@@ -28,7 +33,7 @@ export class AuthController {
     user1: { summary: 'user-1', value: { username: 'john', password: 'changeme' } as LoginDTO } as ExampleObject,
     user2: { summary: 'user-2', value: { username: 'maria', password: 'guess' } as LoginDTO } as ExampleObject,
   } as ExamplesObject })
-  signIn(@Body() signInDto: LoginDTO) {
+  signIn(@Body() signInDto: LoginDTO): Promise<LoginResponseDTO> {
     return this.authService.signIn(signInDto.username, signInDto.password);
   }
 
@@ -40,7 +45,7 @@ export class AuthController {
   } as ExamplesObject })
   async register(@Body() user: UserDTO) {
     try {
-      const result = await this.authService.register(user as User);
+      const result = await this.authService.register(new UserDTO().toUser(user));
       return result;
     } catch(ex) {
       throw new HttpException(ex.message, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -50,7 +55,18 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Get('profile')
   @ApiBearerAuth()
-  getProfile(@Request() req: any) {
-    return req.user;
+  async getProfile(@Request() req: any): Promise<AuthUserProfile | HttpResponseModel<any>> {
+    if (!req.user) {
+      return HttpResponseModel.notFoundResponse('User Not Authenticated ');
+    }
+    const user = await this.usersService.findByID(req.user.sub);
+    if (!user) {
+      return HttpResponseModel.notFoundResponse('Authenticated User not found');
+    }
+    return {
+      user: new UserDTO().fromUser(user),
+      iat: req.user.iat,
+      exp: req.user.exp,
+    } as AuthUserProfile;
   }
 }
