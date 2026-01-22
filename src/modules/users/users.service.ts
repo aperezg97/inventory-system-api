@@ -23,7 +23,7 @@ export class UsersService {
   }
 
   async findByUsername(username: string): Promise<User | undefined> {
-    let result: [User] = (await db
+    let result: User[] = (await db
       .select({
         id: schema.usersTable.id,
         firstName: schema.usersTable.firstName,
@@ -42,7 +42,7 @@ export class UsersService {
         or(eq(schema.usersTable.email, username.toLowerCase()), eq(schema.usersTable.username, username.toLowerCase()))
       )
       // .where(eq(schema.usersTable.username, username))
-      .limit(1)) as [any] as [User];
+      .limit(1)) as any[] as User[];
 
     console.log({result});
 

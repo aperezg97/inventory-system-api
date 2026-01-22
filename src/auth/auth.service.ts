@@ -17,7 +17,7 @@ export class AuthService {
     pass: string,
   ): Promise<LoginResponseDTO> {
     const userMatch = await this.usersService.findByUsername(username) as User;
-    if (userMatch?.password !== pass) {
+    if (!userMatch || userMatch?.password !== pass) {
       throw new UnauthorizedException('Usuario o contraseña incorrectos');
     }
     const payload = { sub: userMatch.id, username: userMatch.username };
