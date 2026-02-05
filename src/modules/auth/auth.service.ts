@@ -20,7 +20,8 @@ export class AuthService {
     if (!userMatch || userMatch?.password !== pass) {
       throw new UnauthorizedException('Usuario o contraseña incorrectos');
     }
-    const payload = { sub: userMatch.id, username: userMatch.username };
+    const payload = { sub: userMatch.id, username: userMatch.username, email: userMatch.email };
+    delete userMatch.password;
     return {
       access_token: await this.jwtService.signAsync(payload),
       user: new UserDTO().fromUser(userMatch),
