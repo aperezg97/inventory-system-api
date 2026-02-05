@@ -15,6 +15,20 @@
       "when": 1726992677173,
       "tag": "0001_create_user_table",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770143050597,
+      "tag": "0002_delete_users_table",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1770322317755,
+      "tag": "0003_create_roles_user_and_employees_table",
+      "breakpoints": true
     }
   ]
 }

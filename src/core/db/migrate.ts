@@ -2,7 +2,7 @@ import { migrate } from "drizzle-orm/node-postgres/migrator";
 import { db } from './connections/drizzle.connections';
 
 // this will automatically run needed migrations on the database
-console.log({
+console.log('Running migrations', {
     dirname: __dirname  + "/migrations",
     DB_URL: process.env.DB_URL
 });

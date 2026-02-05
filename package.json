@@ -14,7 +14,8 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "generate-migration": "drizzle-kit generate --config=src/core/db/drizzle.config.ts",
+    "generate-migration": "drizzle-kit generate --config=src/core/db/drizzle.config.ts --name=%npm_config_name%",
+    "generate-migration_linux": "drizzle-kit generate --config=src/core/db/drizzle.config.ts --name=$npm_config_name",
     "migrate": "ts-node src/core/db/migrate",
     "start": "npm run start:dev",
     "start:dev": "nest start --watch",

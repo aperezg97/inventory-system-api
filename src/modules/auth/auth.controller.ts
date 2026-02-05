@@ -14,17 +14,19 @@ import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from './auth.guard';
 import { HttpResponseModel, LoginDTO, UserDTO } from 'src/core/dtos';
 import { ExampleObject, ExamplesObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
-import { User } from 'src/core/models';
 import { LoginResponseDTO } from 'src/core/dtos/login-response.model';
 import { UsersService } from 'src/modules/users/users.service';
 import { AuthUserProfile } from 'src/core/dtos/auth-user-profile.model';
+import { EmployeesService } from '../employees/employees.service';
+import { EmployeeDTO } from 'src/core/dtos/employee-dto.model';
 
 @Controller('api/auth')
 @ApiTags('Auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private usersService: UsersService
+    private usersService: UsersService,
+    private employeesService: EmployeesService
   ) {}
 
   @HttpCode(HttpStatus.OK)
@@ -41,8 +43,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('register')
   @ApiBody({ type: UserDTO, examples: {
-    user1: { summary: 'user 1', value: { firstName: 'Alex', lastName: 'Perez', email: 'test@test.com', username: 'alex', password: 'alexperez' } as UserDTO } as ExampleObject,
-    user2: { summary: 'user 2', value: { firstName: 'konrix', lastName: 'coderthemes', email: 'konrix@coderthemes.com', username: 'konrix', password: 'konrix' } as UserDTO } as ExampleObject,
+    // user1: { summary: 'user 1', value: { firstName: 'Alex', lastName: 'Perez', email: 'test@test.com', username: 'alex', password: 'alexperez' } as UserDTO } as ExampleObject,
+    // user2: { summary: 'user 2', value: { firstName: 'konrix', lastName: 'coderthemes', email: 'konrix@coderthemes.com', username: 'konrix', password: 'konrix' } as UserDTO } as ExampleObject,
+    user1: { summary: 'user 1', value: { email: 'test@test.com', username: 'alex', password: 'alexperez' } as UserDTO } as ExampleObject,
+    user2: { summary: 'user 2', value: { email: 'konrix@coderthemes.com', username: 'konrix', password: 'konrix' } as UserDTO } as ExampleObject,
   } as ExamplesObject })
   async register(@Body() user: UserDTO) {
     try {
@@ -62,12 +66,12 @@ export class AuthController {
     if (!req.user) {
       return HttpResponseModel.notFoundResponse('User Not Authenticated ');
     }
-    const user = await this.usersService.findByID(req.user.sub);
-    if (!user) {
+    const employeeInfo = await this.employeesService.findByUsername(req.user.sub);
+    if (!employeeInfo) {
       return HttpResponseModel.notFoundResponse('Authenticated User not found');
     }
     return {
-      user: new UserDTO().fromUser(user),
+      user: new EmployeeDTO().fromEmployee(employeeInfo),
       iat: req.user.iat,
       exp: req.user.exp,
     } as AuthUserProfile;

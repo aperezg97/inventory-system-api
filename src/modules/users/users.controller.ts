@@ -2,7 +2,7 @@ import { Controller, Get, Request, UseGuards, Param, Res, Put, Body, Delete, Pat
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from "@nestjs/swagger";
 import { Response } from 'express';
 import { UsersService } from "./users.service";
-import { AuthGuard } from "src/auth/auth.guard";
+import { AuthGuard } from "src/modules/auth/auth.guard";
 import { HttpResponseModel, ToggleStatusModel, UserDTO } from "src/core/dtos";
 import { User } from "src/core/models";
 import { boolean } from "drizzle-orm/gel-core";

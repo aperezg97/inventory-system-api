@@ -1,13 +1,19 @@
+import { Role } from "./role.model";
+
 export class User {
     id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
     username: string;
+    email: string | undefined;
     password: string | undefined;
+    roleId: string;
+    companyId: string;
+
+    role: Role;
+
     isActive: boolean;
-    created_at: Date;
-    created_by: string;
-    updated_at: Date;
-    updated_by: string;
+
+    createdAt: Date;
+    createdBy: string;
+    updatedAt: Date;
+    updatedBy: string;
 }

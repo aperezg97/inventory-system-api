@@ -1,19 +1,13 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { User } from "../models";
+import { Role } from "../models";
 
-export class UserDTO {
+export class RoleDTO {
     @ApiProperty({type: 'string' })
     id: string;
     @ApiProperty({type: 'string' })
-    username: string;
+    name: string;
     @ApiProperty({type: 'string' })
-    email: string | undefined;
-    @ApiProperty({type: 'string' })
-    password: string | undefined;
-    @ApiProperty({type: 'string' })
-    roleId: string;
-    @ApiProperty({type: 'string' })
-    companyId: string;
+    description: string | undefined;
 
     @ApiProperty({type: 'boolean' })
     isActive: boolean;
@@ -27,15 +21,11 @@ export class UserDTO {
     @ApiProperty({type: 'string' })
     updatedBy: string;
 
-    fromUser(data: User): UserDTO {
-        const result = new UserDTO();
+    fromRole(data: Role): RoleDTO {
+        const result = new RoleDTO();
         result.id = data.id;
-        result.username = data.username;
-        result.email = data.email;
-        result.password = data.password;
-        result.roleId = data.roleId;
-        result.companyId = data.companyId;
-        // result.role = data.role;
+        result.name = data.name;
+        result.description = data.description;
         result.isActive = data.isActive;
         result.createdAt = data.createdAt;
         result.createdBy = data.createdBy;
@@ -44,15 +34,11 @@ export class UserDTO {
         return result;
     }
 
-    toUser(data: UserDTO): User {
-        const result = new User();
+    toRole(data: RoleDTO): Role {
+        const result = new Role();
         result.id = data.id;
-        result.username = data.username;
-        result.email = data.email;
-        result.password = data.password;
-        result.roleId = data.roleId;
-        result.companyId = data.companyId;
-        // result.role = data.role;
+        result.name = data.name;
+        result.description = data.description;
         result.isActive = data.isActive;
         result.createdAt = data.createdAt;
         result.createdBy = data.createdBy;

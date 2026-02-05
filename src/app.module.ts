@@ -1,16 +1,18 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { HealthCheckModule } from 'src/health-check/health-check.module';
 
 import { JwtModule } from '@nestjs/jwt';
-import { jwtConstants } from './auth/constants';
+import { jwtConstants } from './modules/auth/constants';
+import { EmployeesModule } from './modules/employees/employees.module';
 
 @Module({
   imports: [
     AuthModule,
+    EmployeesModule,
     UsersModule,
     HealthCheckModule,
     JwtModule.register({
