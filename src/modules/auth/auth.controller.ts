@@ -42,6 +42,12 @@ export class AuthController {
     if (!isUUID(signInDto.companyId ?? '')) {
       return HttpResponseModel.badRequestResponse("CompanyId does not have the required format");
     }
+    // TODO: improve this
+    if (!signInDto.password.endsWith("==")) {
+      signInDto.password += "==";
+    }
+    let hashedPassCombination = atob(signInDto.password);
+    signInDto.password = hashedPassCombination.split('|')[0]; // pass|companyId
     const result = await this.authService.signIn(signInDto);
     return HttpResponseModel.okResponse(result);
   }
