@@ -19,6 +19,8 @@ import { UsersService } from 'src/modules/users/users.service';
 import { AuthUserProfile } from 'src/core/dtos/auth-user-profile.model';
 import { EmployeesService } from '../employees/employees.service';
 import { EmployeeDTO } from 'src/core/dtos/employee-dto.model';
+import { JWTModel } from 'src/core/models';
+import { isUUID } from 'src/utils/helpers';
 
 @Controller('api/auth')
 @ApiTags('Auth')
@@ -32,12 +34,16 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   @ApiBody({ type: LoginDTO, examples: {
-    user0: { summary: 'user-0', value: { username: 'alex', password: 'alexperez' } as LoginDTO } as ExampleObject,
-    user1: { summary: 'user-1', value: { username: 'john', password: 'changeme' } as LoginDTO } as ExampleObject,
-    user2: { summary: 'user-2', value: { username: 'maria', password: 'guess' } as LoginDTO } as ExampleObject,
+    user0: { summary: 'user-0', value: { username: 'alex', password: 'alexperez', companyId: '00000000-0000-0000-0000-000000000000' } as LoginDTO } as ExampleObject,
+    user1: { summary: 'user-1', value: { username: 'john', password: 'changeme', companyId: '00000000-0000-0000-0000-000000000000' } as LoginDTO } as ExampleObject,
+    user2: { summary: 'user-2', value: { username: 'maria', password: 'guess', companyId: '00000000-0000-0000-0000-000000000000' } as LoginDTO } as ExampleObject,
   } as ExamplesObject })
-  signIn(@Body() signInDto: LoginDTO): Promise<LoginResponseDTO> {
-    return this.authService.signIn(signInDto.username, signInDto.password);
+  async signIn(@Body() signInDto: LoginDTO): Promise<HttpResponseModel<LoginResponseDTO>> {
+    if (!isUUID(signInDto.companyId ?? '')) {
+      return HttpResponseModel.badRequestResponse("CompanyId does not have the required format");
+    }
+    const result = await this.authService.signIn(signInDto);
+    return HttpResponseModel.okResponse(result);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -51,7 +57,6 @@ export class AuthController {
   async register(@Body() user: UserDTO) {
     try {
       const result = await this.authService.register(new UserDTO().toUser(user));
-      console.log({result});
       return result;
     } catch(ex) {
       console.log('catch', {ex});
@@ -63,15 +68,15 @@ export class AuthController {
   @Get('profile')
   @ApiBearerAuth()
   async getProfile(@Request() req: any): Promise<AuthUserProfile | HttpResponseModel<any>> {
-    if (!req.user) {
+    if (!(req.user as JWTModel)) {
       return HttpResponseModel.notFoundResponse('User Not Authenticated ');
     }
-    const employeeInfo = await this.employeesService.findByUsername(req.user.sub);
-    if (!employeeInfo) {
-      return HttpResponseModel.notFoundResponse('Authenticated User not found');
-    }
+    const sessionUser = req.user as JWTModel;
+    const user = await this.usersService.findByID(sessionUser.sub);
+    const employeeInfo = await this.employeesService.findByUserID(user.id);
     return {
-      user: new EmployeeDTO().fromEmployee(employeeInfo),
+      employee: employeeInfo ? new EmployeeDTO().fromEmployee(employeeInfo) : null,
+      user: user ? new UserDTO().fromUser(user) : null,
       iat: req.user.iat,
       exp: req.user.exp,
     } as AuthUserProfile;

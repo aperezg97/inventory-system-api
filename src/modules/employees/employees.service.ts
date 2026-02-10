@@ -98,6 +98,11 @@ export class EmployeesService {
     return result;
   }
 
+  async findByUserID(userId: string): Promise<Employee> {
+    const result = await dbQuerySyntax.query.employeesTable.findFirst({ where: eq(schema.employeesTable.userId, userId), }) as any as Employee;
+    return result;
+  }
+
   async insert(data: Employee): Promise<Employee | undefined> {
     const employeeExists = (await db
       .select({ count: count() })

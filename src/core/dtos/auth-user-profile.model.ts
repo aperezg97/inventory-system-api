@@ -1,7 +1,9 @@
 import { EmployeeDTO } from "./employee-dto.model";
+import { UserDTO } from "./user-dto.model";
 
 export class AuthUserProfile {
-    user: EmployeeDTO;
+    user: UserDTO;
+    employee?: EmployeeDTO;
     // token properties
     iat: string;
     exp: string;

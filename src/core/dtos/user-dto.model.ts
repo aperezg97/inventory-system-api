@@ -32,7 +32,7 @@ export class UserDTO {
         result.id = data.id;
         result.username = data.username;
         result.email = data.email;
-        result.password = data.password;
+        // result.password = data.password;
         result.roleId = data.roleId;
         result.companyId = data.companyId;
         // result.role = data.role;
