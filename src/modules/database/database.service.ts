@@ -1,10 +1,10 @@
 import { Injectable } from "@nestjs/common";
-import { db } from "src/core/db/connections/drizzle.connections";
+import { BaseService } from "../base/base.service";
 
 @Injectable()
-export class DatabaseService {
+export class DatabaseService extends BaseService {
     async checkDatabaseHealth(): Promise<boolean> {
-        await db.$client.connect();
+        await this.dbContext.$client.connect();
         return true;
     }
 }

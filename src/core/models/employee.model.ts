@@ -1,6 +1,7 @@
+import { BaseModel } from "./base.model";
 import { User } from "./user.model";
 
-export class Employee {
+export class Employee extends BaseModel {
     id: string;
     firstName: string;
     lastName: string;
@@ -14,11 +15,4 @@ export class Employee {
     userId: string;
 
     user: User | undefined;
-
-    isActive: boolean;
-
-    createdAt: Date;
-    createdBy: string;
-    updatedAt: Date;
-    updatedBy: string;
 }

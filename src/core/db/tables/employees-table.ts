@@ -1,5 +1,5 @@
 import { pgTable, varchar, timestamp, AnyPgColumn, uuid, boolean, uniqueIndex } from "drizzle-orm/pg-core";
-import { usersTable } from ".";
+import { branchOfficesTable, companiesTable, usersTable } from ".";
 
 export const employeesTable = pgTable("employees", {
   id: uuid("id").defaultRandom().primaryKey().unique(),
@@ -10,8 +10,8 @@ export const employeesTable = pgTable("employees", {
   phoneNumber: varchar("phone_number", { length: 15 }),
   profileImageUrl: varchar("profile_image_url", { length: 250 }),
 
-  branchOfficeId: uuid("branch_office_id"),
-  companyId: uuid("company_id"),
+  branchOfficeId: uuid("branch_office_id").references((): AnyPgColumn => branchOfficesTable.id),
+  companyId: uuid("company_id").references((): AnyPgColumn => companiesTable.id),
   userId: uuid("user_id").references((): AnyPgColumn => usersTable.id),
 
   isActive: boolean("is_active").default(false),

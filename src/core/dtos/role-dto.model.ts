@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { Role } from "../models";
+import { RoleModel } from "../models";
 
 export class RoleDTO {
     @ApiProperty({type: 'string' })
@@ -21,7 +21,7 @@ export class RoleDTO {
     @ApiProperty({type: 'string' })
     updatedBy: string;
 
-    fromRole(data: Role): RoleDTO {
+    fromRole(data: RoleModel): RoleDTO {
         const result = new RoleDTO();
         result.id = data.id;
         result.name = data.name;
@@ -34,8 +34,8 @@ export class RoleDTO {
         return result;
     }
 
-    toRole(data: RoleDTO): Role {
-        const result = new Role();
+    toRole(data: RoleDTO): RoleModel {
+        const result = new RoleModel();
         result.id = data.id;
         result.name = data.name;
         result.description = data.description;

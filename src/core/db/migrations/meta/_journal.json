@@ -29,6 +29,13 @@
       "when": 1770322317755,
       "tag": "0003_create_roles_user_and_employees_table",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1770833928195,
+      "tag": "0004_create_company_and_branch_offices_tables",
+      "breakpoints": true
     }
   ]
 }

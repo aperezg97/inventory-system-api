@@ -1,38 +1,36 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { and, asc, eq, or, } from 'drizzle-orm';
-import { db } from 'src/core/db/connections/drizzle.connections';
-import { dbQuerySyntax } from 'src/core/db/connections/drizzle-query-syntax.connections';
-import * as schema from 'src/core/db/schema';
 import { InsertUserType } from 'src/core/db/schema.types';
 import { count, gt } from 'drizzle-orm';
 import { ToggleStatusModel } from 'src/core/dtos';
-import { Role, User } from 'src/core/models';
+import { RoleModel, User } from 'src/core/models';
+import { BaseService } from '../base/base.service';
 
 /*
-let userResult: User[] = (await db
+let userResult: User[] = (await this.dbContext
       .select({
-        id: schema.usersTable.id,
-        firstName: schema.usersTable.firstName,
-        lastName: schema.usersTable.lastName,
-        email: schema.usersTable.email,
-        username: schema.usersTable.username,
-        password: schema.usersTable.password,
-        isActive: schema.usersTable.isActive,
-        created_at: schema.usersTable.created_at,
-        created_by: schema.usersTable.created_by,
-        updated_at: schema.usersTable.updated_at,
-        updated_by: schema.usersTable.updated_by,
+        id: this.dbSchema.usersTable.id,
+        firstName: this.dbSchema.usersTable.firstName,
+        lastName: this.dbSchema.usersTable.lastName,
+        email: this.dbSchema.usersTable.email,
+        username: this.dbSchema.usersTable.username,
+        password: this.dbSchema.usersTable.password,
+        isActive: this.dbSchema.usersTable.isActive,
+        created_at: this.dbSchema.usersTable.created_at,
+        created_by: this.dbSchema.usersTable.created_by,
+        updated_at: this.dbSchema.usersTable.updated_at,
+        updated_by: this.dbSchema.usersTable.updated_by,
       })
-      .from(schema.usersTable)
+      .from(this.dbSchema.usersTable)
       .where(
-        or(eq(schema.usersTable.email, username.toLowerCase()), eq(schema.usersTable.username, username.toLowerCase()))
+        or(eq(this.dbSchema.usersTable.email, username.toLowerCase()), eq(this.dbSchema.usersTable.username, username.toLowerCase()))
       )
-      // .where(eq(schema.usersTable.username, username))
+      // .where(eq(this.dbSchema.usersTable.username, username))
       .limit(1)) as any[] as User[];
 
     console.log({userResult});
 
-    const resultFirst = await dbQuerySyntax.query.usersTable.findFirst({
+    const resultFirst = await this.dbContextQuerySyntax.query.usersTable.findFirst({
       columns: {
         id: true,
         firstName: true,
@@ -46,7 +44,7 @@ let userResult: User[] = (await db
         updated_by: true,
         password: false,
       },
-      where: or(eq(schema.usersTable.email, username.toLowerCase()), eq(schema.usersTable.username, username.toLowerCase())),
+      where: or(eq(this.dbSchema.usersTable.email, username.toLowerCase()), eq(this.dbSchema.usersTable.username, username.toLowerCase())),
       with: {
         createdBy: true,
       },
@@ -54,78 +52,48 @@ let userResult: User[] = (await db
 */
 
 @Injectable()
-export class UsersService {
+export class UsersService extends BaseService {
 
   async findOne(username: string): Promise<User | undefined> {
-    let result: [User] = (await db
-      .select()
-      .from(schema.usersTable)
-      .where(eq(schema.usersTable.username, username))
-      .limit(1)) as [any] as [User];
-      console.log({result});
-      return result?.length ? result[0] : undefined;
+    let result = await this.findOneById<User>(username, this.dbSchema.usersTable.username, this.dbSchema.usersTable);
+    return result;
   }
 
   async findByUsername(username: string, companyId: string): Promise<User | undefined> {
-    let userResult: User[] = (await db
-      .select({
-        id: schema.usersTable.id,
-        username: schema.usersTable.username,
-        password: schema.usersTable.password,
-        isActive: schema.usersTable.isActive,
-        created_at: schema.usersTable.createdAt,
-        created_by: schema.usersTable.createdBy,
-        updated_at: schema.usersTable.updatedAt,
-        updated_by: schema.usersTable.updatedBy,
-      })
-      .from(schema.usersTable)
-      .where(
-        and(eq(schema.usersTable.username, username.toLowerCase()), eq(schema.usersTable.companyId, companyId.toLowerCase()))
-      )
-      // .where(eq(schema.usersTable.username, username))
-      .limit(1)) as any[] as User[];
-
-    console.log({userResult});
-
-    if (!userResult?.length) {
+    let userResult = await this.findOneByIdAndCompany<User>(username, companyId, this.dbSchema.usersTable.username, this.dbSchema.usersTable.companyId, this.dbSchema.usersTable);
+    if (!userResult) {
       return undefined;
     }
-    const user = userResult[0];
+    const user = userResult;
     if (user.roleId) {
-      const roleResult: Role[] = (await db
-        .select()
-        .from(schema.rolesTable)
-        .where(eq(schema.rolesTable.id, user.roleId))
-        .limit(1)) as any[] as Role[];
-
-      if (roleResult?.length) {
-        user.role = roleResult[0];
+      const roleResult = await this.findOneByIdAndCompany<RoleModel>(username, companyId, this.dbSchema.rolesTable.id, this.dbSchema.rolesTable.companyId, this.dbSchema.rolesTable);
+      if (roleResult) {
+        user.role = roleResult;
       }
     }
-
     return user;
   }
 
   async findAll(): Promise<User[]> {
-    const result = (await db
+    const result = (await this.dbContext
       .select({
-        id: schema.usersTable.id,
-        email: schema.usersTable.email,
-        username: schema.usersTable.username,
-        isActive: schema.usersTable.isActive,
-        createdAt: schema.usersTable.createdAt,
-        createdBy: schema.usersTable.createdBy,
-        updatedAt: schema.usersTable.updatedAt,
-        updatedBy: schema.usersTable.updatedBy,
+        id: this.dbSchema.usersTable.id,
+        email: this.dbSchema.usersTable.email,
+        username: this.dbSchema.usersTable.username,
+        isActive: this.dbSchema.usersTable.isActive,
+        createdAt: this.dbSchema.usersTable.createdAt,
+        createdBy: this.dbSchema.usersTable.createdBy,
+        updatedAt: this.dbSchema.usersTable.updatedAt,
+        updatedBy: this.dbSchema.usersTable.updatedBy,
        })
-      .from(schema.usersTable)
-      .orderBy(asc(schema.usersTable.username))
+      .from(this.dbSchema.usersTable)
+      .orderBy(asc(this.dbSchema.usersTable.username))
     ) as User[];
     return result.map(x => ({ ...x, password: undefined }));
   }
 
   async findByID(id: string): Promise<User> {
-    const result = await dbQuerySyntax.query.usersTable.findFirst({ where: eq(schema.usersTable.id, id), }) as User;
+    const result = await this.dbContextQuerySyntax.query.usersTable.findFirst({ where: eq(this.dbSchema.usersTable.id, id), }) as User;
     return result;
   }
 
@@ -133,21 +101,21 @@ export class UsersService {
     let whereCondition = user.email ?
       or(
         and(
-          eq(schema.usersTable.email, user.email!.toLowerCase()),
-          eq(schema.usersTable.companyId, user.companyId),
+          eq(this.dbSchema.usersTable.email, user.email!.toLowerCase()),
+          eq(this.dbSchema.usersTable.companyId, user.companyId),
         ),
         and(
-          eq(schema.usersTable.username, user.username.toLowerCase()),
-          eq(schema.usersTable.companyId, user.companyId),
+          eq(this.dbSchema.usersTable.username, user.username.toLowerCase()),
+          eq(this.dbSchema.usersTable.companyId, user.companyId),
         ),
       ) :
       and(
-          eq(schema.usersTable.username, user.username.toLowerCase()),
-          eq(schema.usersTable.companyId, user.companyId),
+          eq(this.dbSchema.usersTable.username, user.username.toLowerCase()),
+          eq(this.dbSchema.usersTable.companyId, user.companyId),
       );
-    const userExists = (await db
+    const userExists = (await this.dbContext
       .select({ count: count() })
-      .from(schema.usersTable)
+      .from(this.dbSchema.usersTable)
       .where(whereCondition))[0];
     if (userExists.count > 0) {
       throw new BadRequestException('User with that email or username already exists!');
@@ -162,12 +130,12 @@ export class UsersService {
     userData.id = undefined;
     userData.isActive = true;
 
-    let result = db.insert(schema.usersTable)
+    let result = this.dbContext.insert(this.dbSchema.usersTable)
       .values(userData)
       .returning() as any as User;
-    // .returning({ id: schema.usersTable.id });
+    // .returning({ id: this.dbSchema.usersTable.id });
 
-    // const resultFirst = await (await dbQuerySyntax.insert(schema.usersTable).values(userData)).rowCount;
+    // const resultFirst = await (await this.dbContextQuerySyntax.insert(this.dbSchema.usersTable).values(userData)).rowCount;
 
     return result;
 
@@ -178,7 +146,7 @@ export class UsersService {
     if (!user.username) {
       throw new BadRequestException('Username is required!');
     }
-    const existingUser = await dbQuerySyntax.query.usersTable.findFirst({ where: eq(schema.usersTable.id, user.id), }) as User;
+    const existingUser = await this.dbContextQuerySyntax.query.usersTable.findFirst({ where: eq(this.dbSchema.usersTable.id, user.id), }) as User;
     if (!existingUser) {
       throw new BadRequestException('User with ID: ' + user.id + ' does not exist!');
     }
@@ -193,15 +161,15 @@ export class UsersService {
       delete toUpdate.password;
     }
 
-    await db.update(schema.usersTable)
+    await this.dbContext.update(this.dbSchema.usersTable)
       .set(toUpdate)
-      .where(eq(schema.usersTable.id, user.id));
+      .where(eq(this.dbSchema.usersTable.id, user.id));
 
     return true;
   }
 
   async toggleActiveStatus(userId: string, data: ToggleStatusModel): Promise<boolean | undefined> {
-    const existingUser = await dbQuerySyntax.query.usersTable.findFirst({ where: eq(schema.usersTable.id, userId), }) as User;
+    const existingUser = await this.dbContextQuerySyntax.query.usersTable.findFirst({ where: eq(this.dbSchema.usersTable.id, userId), }) as User;
     if (!existingUser) {
       throw new BadRequestException('User does not exist!');
     }
@@ -211,9 +179,9 @@ export class UsersService {
       updated_at: new Date(),
     };
 
-    await db.update(schema.usersTable)
+    await this.dbContext.update(this.dbSchema.usersTable)
       .set(toUpdate)
-      .where(eq(schema.usersTable.id, userId));
+      .where(eq(this.dbSchema.usersTable.id, userId));
 
     return true;
   }

@@ -4,7 +4,7 @@ import {
   Post,
   HttpCode,
   HttpStatus,
-  Request,
+  Req,
   Get,
   UseGuards,
   HttpException,
@@ -19,8 +19,9 @@ import { UsersService } from 'src/modules/users/users.service';
 import { AuthUserProfile } from 'src/core/dtos/auth-user-profile.model';
 import { EmployeesService } from '../employees/employees.service';
 import { EmployeeDTO } from 'src/core/dtos/employee-dto.model';
-import { JWTModel } from 'src/core/models';
+import { JWTModel, RequestModel } from 'src/core/models/api';
 import { isUUID } from 'src/utils/helpers';
+import type { Request } from 'express';
 
 @Controller('api/auth')
 @ApiTags('Auth')
@@ -73,18 +74,18 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @Get('profile')
   @ApiBearerAuth()
-  async getProfile(@Request() req: any): Promise<AuthUserProfile | HttpResponseModel<any>> {
-    if (!(req.user as JWTModel)) {
+  async getProfile(@Req() req: RequestModel): Promise<AuthUserProfile | HttpResponseModel<any>> {
+    console.log({req});
+    if (!req.user) {
       return HttpResponseModel.notFoundResponse('User Not Authenticated ');
     }
-    const sessionUser = req.user as JWTModel;
-    const user = await this.usersService.findByID(sessionUser.sub);
+    const user = req.user;
     const employeeInfo = await this.employeesService.findByUserID(user.id);
     return {
       employee: employeeInfo ? new EmployeeDTO().fromEmployee(employeeInfo) : null,
       user: user ? new UserDTO().fromUser(user) : null,
-      iat: req.user.iat,
-      exp: req.user.exp,
+      iat: req.iat,
+      exp: req.exp,
     } as AuthUserProfile;
   }
 }

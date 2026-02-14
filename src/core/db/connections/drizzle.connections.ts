@@ -5,9 +5,12 @@ require('dotenv').config();
 
 const pool = new Pool({
     connectionString: process.env.DB_URL,
+    // log: (msg) => console.log('DB: ', msg),
   });
-
-  const db = drizzle(pool);
+  const dbLogger: boolean = process.env.DB_LOGGER === "true";
+  const db = drizzle(pool, {
+    logger: dbLogger
+  });
 
   export { pool, db };
   // export default config;

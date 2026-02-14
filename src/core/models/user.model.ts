@@ -1,6 +1,7 @@
-import { Role } from "./role.model";
+import { BaseModel } from "./base.model";
+import { RoleModel } from "./role.model";
 
-export class User {
+export class User extends BaseModel {
     id: string;
     username: string;
     email: string | undefined;
@@ -8,12 +9,5 @@ export class User {
     roleId: string;
     companyId: string;
 
-    role: Role;
-
-    isActive: boolean;
-
-    createdAt: Date;
-    createdBy: string;
-    updatedAt: Date;
-    updatedBy: string;
+    role: RoleModel;
 }

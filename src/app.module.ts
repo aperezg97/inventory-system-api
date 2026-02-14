@@ -8,6 +8,7 @@ import { HealthCheckModule } from 'src/health-check/health-check.module';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './modules/auth/constants';
 import { EmployeesModule } from './modules/employees/employees.module';
+import { CompaniesModule } from './modules/companies/companies.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { EmployeesModule } from './modules/employees/employees.module';
           secret: jwtConstants.secret,
           signOptions: { expiresIn: jwtConstants.expiresIn },
         }),
+    CompaniesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

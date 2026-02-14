@@ -5,6 +5,6 @@ export class AuthUserProfile {
     user: UserDTO;
     employee?: EmployeeDTO;
     // token properties
-    iat: string;
-    exp: string;
+    iat: number;
+    exp: number;
 }

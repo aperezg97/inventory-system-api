@@ -92,3 +92,19 @@ npm run generate-migration -- --name=migration_name
 ```bash
 npm run generate-migration -- --custom
 ```
+
+## Nest commands
+- See help
+```bash
+nest -h
+```
+
+- Generate module
+```bash
+nest generate module
+```
+or
+```
+npm run nest -- -- generate
+```
+ie. npm run nest -- -- generate module modules/companies

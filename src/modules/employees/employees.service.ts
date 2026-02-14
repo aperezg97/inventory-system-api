@@ -1,123 +1,82 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { and, asc, eq, or, } from 'drizzle-orm';
-import { db } from 'src/core/db/connections/drizzle.connections';
-import { dbQuerySyntax } from 'src/core/db/connections/drizzle-query-syntax.connections';
-import * as schema from 'src/core/db/schema';
 import { InsertUserType } from 'src/core/db/schema.types';
-import { Employee, Role, User } from 'src/core/models';
+import { Employee, RoleModel, User } from 'src/core/models';
 import { count, gt } from 'drizzle-orm';
 import { ToggleStatusModel } from 'src/core/dtos';
+import { BaseService } from '../base/base.service';
 
 @Injectable()
-export class EmployeesService {
+export class EmployeesService extends BaseService {
 
-  async findOne(id: string): Promise<Employee | undefined> {
-    let result: Employee[] = (await db
-      .select()
-      .from(schema.employeesTable)
-      .where(eq(schema.employeesTable.id, id))
-      .limit(1)) as any[] as Employee[];
+  private serviceTable = this.dbSchema.employeesTable;
 
-      return result?.length ? result[0] : undefined;
+  async findOne(id: string, companyId: string): Promise<Employee | undefined> {
+    let result = await this.findOneByIdAndCompany<Employee>(id, companyId, this.serviceTable.id, this.serviceTable.companyId, this.serviceTable);
+    return result;
   }
 
-  async findByEmail(email: string): Promise<Employee | undefined> {
-    let result: Employee[] = (await db
-      .select()
-      .from(schema.employeesTable)
-      .where(eq(schema.employeesTable.email, email))
-      .limit(1)) as any[] as Employee[];
-
-      return result?.length ? result[0] : undefined;
+  async findByEmail(email: string, companyId: string): Promise<Employee | undefined> {
+    const result = await this.findOneByIdAndCompany<Employee>(email, companyId, this.serviceTable.email, this.serviceTable.companyId, this.serviceTable);
+    return result;
   }
 
   async findByUsername(username: string): Promise<Employee | undefined> {
-    let userResult: User[] = (await db
-      .select({
-        id: schema.usersTable.id,
-        username: schema.usersTable.username,
-        password: schema.usersTable.password,
-        isActive: schema.usersTable.isActive,
-        created_at: schema.usersTable.createdAt,
-        created_by: schema.usersTable.createdBy,
-        updated_at: schema.usersTable.updatedAt,
-        updated_by: schema.usersTable.updatedBy,
-      })
-      .from(schema.usersTable)
-      .where(
-        or(eq(schema.usersTable.username, username.toLowerCase()), eq(schema.usersTable.username, username.toLowerCase()))
-      )
-      // .where(eq(schema.usersTable.username, username))
-      .limit(1)) as any[] as User[];
-
-    console.log({userResult});
-
-    if (!userResult?.length) {
+    const userResult = await this.findOneById<User>(username, this.dbSchema.usersTable.username, this.dbSchema.usersTable);
+    if (!userResult) {
       return undefined;
     }
-    const user = userResult[0];
+    delete userResult.password;
+    const user = userResult;
     if (user.roleId) {
-      const roleResult: Role[] = (await db
-        .select()
-        .from(schema.rolesTable)
-        .where(eq(schema.rolesTable.id, user.roleId))
-        .limit(1)) as any[] as Role[];
-
-      if (roleResult?.length) {
-        user.role = roleResult[0];
+      const roleResult = await this.findOneById<RoleModel>(user.roleId, this.dbSchema.rolesTable.id, this.dbSchema.rolesTable);
+      if (roleResult) {
+        user.role = roleResult;
       }
     }
-
-    let employeeResult: Employee[] = (await db
-      .select()
-      .from(schema.employeesTable)
-      .where(eq(schema.employeesTable.userId, user.id))
-      .limit(1)) as any[] as Employee[];
-
-    if (!employeeResult?.length) {
+    const employeeResult = await this.findOneById<Employee>(user.id, this.dbSchema.employeesTable.userId, this.dbSchema.employeesTable);
+    if (!employeeResult) {
       return undefined;
     }
-
-    const employee = employeeResult[0];
+    const employee = employeeResult;
     employee.user = user;
-
     return employee;
   }
 
   async findAll(): Promise<Employee[]> {
-    const result = (await db
+    const result = (await this.dbContext
       .select()
-      .from(schema.employeesTable)
-      .orderBy(asc(schema.employeesTable.firstName), asc(schema.employeesTable.lastName))
+      .from(this.serviceTable)
+      .orderBy(asc(this.serviceTable.firstName), asc(this.serviceTable.lastName))
     ) as any[] as Employee[];
     return result;
   }
 
   async findByID(id: string): Promise<Employee> {
-    const result = await dbQuerySyntax.query.employeesTable.findFirst({ where: eq(schema.employeesTable.id, id), }) as any as Employee;
+    const result = await this.dbContextQuerySyntax.query.employeesTable.findFirst({ where: eq(this.serviceTable.id, id), }) as any as Employee;
     return result;
   }
 
   async findByUserID(userId: string): Promise<Employee> {
-    const result = await dbQuerySyntax.query.employeesTable.findFirst({ where: eq(schema.employeesTable.userId, userId), }) as any as Employee;
+    const result = await this.dbContextQuerySyntax.query.employeesTable.findFirst({ where: eq(this.serviceTable.userId, userId), }) as any as Employee;
     return result;
   }
 
   async insert(data: Employee): Promise<Employee | undefined> {
-    const employeeExists = (await db
+    const employeeExists = (await this.dbContext
       .select({ count: count() })
-      .from(schema.employeesTable)
+      .from(this.serviceTable)
       .where(and(
-        eq(schema.employeesTable.email, data.email.toLowerCase()),
-        eq(schema.employeesTable.companyId, data.companyId),
+        eq(this.serviceTable.email, data.email.toLowerCase()),
+        eq(this.serviceTable.companyId, data.companyId),
     )))[0];
     if (employeeExists.count > 0) {
       throw new BadRequestException('Employee with that email or username already exists!');
     }
-    const userExists = (await db
+    const userExists = (await this.dbContext
       .select({ count: count() })
-      .from(schema.usersTable)
-      .where(and(eq(schema.usersTable.email, data.email.toLowerCase()), eq(schema.usersTable.companyId, data.companyId)),
+      .from(this.dbSchema.usersTable)
+      .where(and(eq(this.dbSchema.usersTable.email, data.email.toLowerCase()), eq(this.dbSchema.usersTable.companyId, data.companyId)),
       ))[0];
     if (userExists.count > 0) {
       throw new BadRequestException('User with that email or username already exists!');
@@ -132,12 +91,12 @@ export class EmployeesService {
     employeeData.id = undefined;
     employeeData.isActive = true;
 
-    let result = db.insert(schema.usersTable)
+    let result = this.dbContext.insert(this.dbSchema.usersTable)
       .values(employeeData)
       .returning() as any as Employee;
-    // .returning({ id: schema.usersTable.id });
+    // .returning({ id: this.dbSchema.usersTable.id });
 
-    // const resultFirst = await (await dbQuerySyntax.insert(schema.usersTable).values(userData)).rowCount;
+    // const resultFirst = await (await this.dbContextQuerySyntax.insert(this.dbSchema.usersTable).values(userData)).rowCount;
 
     return result;
 
@@ -145,7 +104,7 @@ export class EmployeesService {
   }
 
   async update(data: Employee): Promise<boolean | undefined> {
-    const existingUser = await dbQuerySyntax.query.employeesTable.findFirst({ where: eq(schema.employeesTable.id, data.id) }) as Employee;
+    const existingUser = await this.dbContextQuerySyntax.query.employeesTable.findFirst({ where: eq(this.serviceTable.id, data.id) }) as Employee;
     if (!existingUser) {
       throw new BadRequestException('User with ID: ' + data.id + ' does not exist!');
     }
@@ -161,15 +120,15 @@ export class EmployeesService {
       updatedAt: new Date(),
     };
 
-    await db.update(schema.employeesTable)
+    await this.dbContext.update(this.serviceTable)
       .set(toUpdate)
-      .where(eq(schema.employeesTable.id, data.id));
+      .where(eq(this.serviceTable.id, data.id));
 
     return true;
   }
 
   async toggleActiveStatus(employeeId: string, data: ToggleStatusModel): Promise<boolean | undefined> {
-    const existing = await dbQuerySyntax.query.employeesTable.findFirst({ where: eq(schema.employeesTable.id, employeeId), }) as Employee;
+    const existing = await this.dbContextQuerySyntax.query.employeesTable.findFirst({ where: eq(this.serviceTable.id, employeeId), }) as Employee;
     if (!existing) {
       throw new BadRequestException('Employee does not exist!');
     }
@@ -179,9 +138,9 @@ export class EmployeesService {
       updatedAt: new Date(),
     };
 
-    await db.update(schema.employeesTable)
+    await this.dbContext.update(this.serviceTable)
       .set(toUpdate)
-      .where(eq(schema.employeesTable.id, employeeId));
+      .where(eq(this.serviceTable.id, employeeId));
 
     return true;
   }
