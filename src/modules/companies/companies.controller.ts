@@ -3,6 +3,7 @@ import { CompaniesService } from './companies.service';
 import { CompanyModel } from 'src/core/models';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
+import { RequestModel } from 'src/core/models/api';
 
 @ApiTags('Companies')
 @Controller('companies')
@@ -12,8 +13,9 @@ export class CompaniesController {
   constructor(private readonly companiesService: CompaniesService) {}
 
   @Post()
-  create(@Body() createCompanyDto: CompanyModel, @Req() req: Request) {
+  create(@Body() createCompanyDto: CompanyModel, @Req() req: RequestModel) {
     console.log({req});
+    // req.companyId
     return this.companiesService.create(createCompanyDto);
   }
 

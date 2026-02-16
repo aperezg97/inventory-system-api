@@ -19,9 +19,8 @@ import { UsersService } from 'src/modules/users/users.service';
 import { AuthUserProfile } from 'src/core/dtos/auth-user-profile.model';
 import { EmployeesService } from '../employees/employees.service';
 import { EmployeeDTO } from 'src/core/dtos/employee-dto.model';
-import { JWTModel, RequestModel } from 'src/core/models/api';
+import { RequestModel } from 'src/core/models/api';
 import { isUUID } from 'src/utils/helpers';
-import type { Request } from 'express';
 
 @Controller('api/auth')
 @ApiTags('Auth')
@@ -75,7 +74,6 @@ export class AuthController {
   @Get('profile')
   @ApiBearerAuth()
   async getProfile(@Req() req: RequestModel): Promise<AuthUserProfile | HttpResponseModel<any>> {
-    console.log({req});
     if (!req.user) {
       return HttpResponseModel.notFoundResponse('User Not Authenticated ');
     }

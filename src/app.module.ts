@@ -9,6 +9,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './modules/auth/constants';
 import { EmployeesModule } from './modules/employees/employees.module';
 import { CompaniesModule } from './modules/companies/companies.module';
+import { CacheService } from './modules/utils/cache.service';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { CompaniesModule } from './modules/companies/companies.module';
     CompaniesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, CacheService],
+  exports: [CacheService]
 })
 export class AppModule {}

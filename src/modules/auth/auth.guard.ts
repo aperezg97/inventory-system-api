@@ -9,12 +9,18 @@ import { jwtConstants } from './constants';
 import { Request } from 'express';
 import { JWTModel, RequestModel } from 'src/core/models/api';
 import { UsersService } from '../users/users.service';
+import { CacheService } from '../utils/cache.service';
+import { User } from 'src/core/models';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+  private USER_SESSION_CACHE_TTL = 10 * 60; // 10 minutes
+  private USER_SESSION_CACHE_KEYS = ['auth', 'user_session'];
+
   constructor(
     private jwtService: JwtService,
-    private userService: UsersService
+    private userService: UsersService,
+    private cacheService: CacheService
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -28,20 +34,23 @@ export class AuthGuard implements CanActivate {
         secret: jwtConstants.secret,
       });
       const expirationDate = new Date(payload.exp! * 1000);
-      console.log({expirationDate});
       const now = new Date();
       if (now >= expirationDate) {
         throw new UnauthorizedException();
       }
-      console.log({
-        sub: payload.sub,
-      });
-      // TODO:
-      // Handle caching to store user session?
-      const user = await this.userService.findByID(payload.sub);
-      console.log({user});
+      const userSessionCacheKeys = this.USER_SESSION_CACHE_KEYS.concat([payload.sub]);
+      const cachedUserSession = this.cacheService.getFromCache<User>(userSessionCacheKeys);
+      let user!: User;
+      if (cachedUserSession) {
+        user = cachedUserSession;
+      } else {
+        user = await this.userService.findByID(payload.sub);
+      }
       if (!user) {
         throw new UnauthorizedException();
+      }
+      if (!cachedUserSession) {
+        this.cacheService.setToCache(userSessionCacheKeys, user, this.USER_SESSION_CACHE_TTL);
       }
       delete user.password;
       // 💡 We're assigning the payload to the request object here
