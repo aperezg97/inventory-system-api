@@ -11,11 +11,11 @@ import { JWTModel, RequestModel } from 'src/core/models/api';
 import { UsersService } from '../users/users.service';
 import { CacheService } from '../utils/cache.service';
 import { User } from 'src/core/models';
+import { Constants } from '../utils/constants';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  private USER_SESSION_CACHE_TTL = 10 * 60; // 10 minutes
-  private USER_SESSION_CACHE_KEYS = ['auth', 'user_session'];
+  private readonly USER_SESSION_CACHE_TTL = 10 * 60; // 10 minutes
 
   constructor(
     private jwtService: JwtService,
@@ -38,7 +38,7 @@ export class AuthGuard implements CanActivate {
       if (now >= expirationDate) {
         throw new UnauthorizedException();
       }
-      const userSessionCacheKeys = this.USER_SESSION_CACHE_KEYS.concat([payload.sub]);
+      const userSessionCacheKeys = [payload.companyId, ...Constants.USER_SESSION_CACHE_KEYS, payload.sub];
       const cachedUserSession = this.cacheService.getFromCache<User>(userSessionCacheKeys);
       let user!: User;
       if (cachedUserSession) {
@@ -49,10 +49,10 @@ export class AuthGuard implements CanActivate {
       if (!user) {
         throw new UnauthorizedException();
       }
+      delete user.password;
       if (!cachedUserSession) {
         this.cacheService.setToCache(userSessionCacheKeys, user, this.USER_SESSION_CACHE_TTL);
       }
-      delete user.password;
       // 💡 We're assigning the payload to the request object here
       // so that we can access it in our route handlers
       request.user = user;

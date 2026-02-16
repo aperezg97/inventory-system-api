@@ -8,7 +8,7 @@ import { User } from "src/core/models";
 import { boolean } from "drizzle-orm/gel-core";
 import { randomUUID } from "crypto";
 
-@Controller('api/users')
+@Controller('api/v1/users')
 @ApiTags('Users')
 export class UsersController {
     constructor(private usersService: UsersService) { }

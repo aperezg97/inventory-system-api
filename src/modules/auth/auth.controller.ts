@@ -15,20 +15,18 @@ import { AuthGuard } from './auth.guard';
 import { HttpResponseModel, LoginDTO, UserDTO } from 'src/core/dtos';
 import { ExampleObject, ExamplesObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import { LoginResponseDTO } from 'src/core/dtos/login-response.model';
-import { UsersService } from 'src/modules/users/users.service';
 import { AuthUserProfile } from 'src/core/dtos/auth-user-profile.model';
 import { EmployeesService } from '../employees/employees.service';
 import { EmployeeDTO } from 'src/core/dtos/employee-dto.model';
 import { RequestModel } from 'src/core/models/api';
 import { isUUID } from 'src/utils/helpers';
 
-@Controller('api/auth')
+@Controller('api/v1/auth')
 @ApiTags('Auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
-    private usersService: UsersService,
-    private employeesService: EmployeesService
+    private employeesService: EmployeesService,
   ) {}
 
   @HttpCode(HttpStatus.OK)
@@ -85,5 +83,17 @@ export class AuthController {
       iat: req.iat,
       exp: req.exp,
     } as AuthUserProfile;
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('logout')
+  @ApiBody({ type: UserDTO, examples: {} as ExamplesObject })
+  async logout(@Req() req: RequestModel): Promise<HttpResponseModel<any>> {
+    try {
+      const result = await this.authService.logout(req.companyId, req.user?.id);
+      return HttpResponseModel.okResponse(result);
+    } catch(ex) {
+      throw new HttpException(ex.message, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 }

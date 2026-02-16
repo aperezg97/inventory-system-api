@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, Scope } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
@@ -9,11 +9,15 @@ import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './modules/auth/constants';
 import { EmployeesModule } from './modules/employees/employees.module';
 import { CompaniesModule } from './modules/companies/companies.module';
-import { CacheService } from './modules/utils/cache.service';
+import { CacheModule } from './modules/cache/cache.module';
+import { UtilsModule } from './modules/utils/utils.module';
 
 @Module({
   imports: [
     AuthModule,
+    UtilsModule,
+    CacheModule,
+    CompaniesModule,
     EmployeesModule,
     UsersModule,
     HealthCheckModule,
@@ -22,10 +26,10 @@ import { CacheService } from './modules/utils/cache.service';
           secret: jwtConstants.secret,
           signOptions: { expiresIn: jwtConstants.expiresIn },
         }),
-    CompaniesModule,
+    UtilsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, CacheService],
-  exports: [CacheService]
+  providers: [AppService],
+  exports: []
 })
 export class AppModule {}

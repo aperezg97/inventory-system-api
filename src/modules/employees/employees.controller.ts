@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '../auth/auth.guard';
 
 @ApiTags('Employees')
-@Controller('employees')
+@Controller('api/v1/employees')
 @UseGuards(AuthGuard)
 @ApiBearerAuth()
 export class EmployeesController {}

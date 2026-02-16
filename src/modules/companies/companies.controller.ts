@@ -6,7 +6,7 @@ import { AuthGuard } from '../auth/auth.guard';
 import { RequestModel } from 'src/core/models/api';
 
 @ApiTags('Companies')
-@Controller('companies')
+@Controller('api/v1/companies')
 @UseGuards(AuthGuard)
 @ApiBearerAuth()
 export class CompaniesController {

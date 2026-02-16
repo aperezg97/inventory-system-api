@@ -2,8 +2,8 @@ import { Controller, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { DatabaseService } from 'src/modules/database/database.service';
 
-@ApiTags('api/healthcheck')
-@Controller('healthcheck')
+@ApiTags('healthcheck')
+@Controller('api/v1/healthcheck')
 export class HealthCheckController {
 
   constructor(private readonly databaseService: DatabaseService) {

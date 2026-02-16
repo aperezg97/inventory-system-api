@@ -4,11 +4,11 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { UsersModule } from 'src/modules/users/users.module';
 import { EmployeesModule } from '../employees/employees.module';
-import { CacheService } from '../utils/cache.service';
+import { UtilsModule } from '../utils/utils.module';
 
 @Module({
-  imports: [EmployeesModule, UsersModule],
-  providers: [AuthService, CacheService],
+  imports: [EmployeesModule, UsersModule, UtilsModule],
+  providers: [AuthService],
   controllers: [AuthController],
   exports: [AuthService],
 })

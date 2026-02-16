@@ -1,5 +1,7 @@
+import { Injectable, Scope } from "@nestjs/common";
 import NodeCache = require("node-cache");
 
+@Injectable({ scope: Scope.DEFAULT })
 export class CacheService {
     private nodeCache: NodeCache;
     private defaultTTL: number;
@@ -24,5 +26,13 @@ export class CacheService {
 
     flushAll() {
         this.nodeCache.flushAll();
+    }
+
+    getStats(): NodeCache.Stats  {
+        return this.nodeCache.getStats();
+    }
+
+    getData(): {[key: string]: any}  {
+        return this.nodeCache.data;
     }
 }
