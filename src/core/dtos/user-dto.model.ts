@@ -1,7 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { User } from "../models";
+import { BaseDTOModel } from "./base";
 
-export class UserDTO {
+export class UserDTO extends BaseDTOModel {
     @ApiProperty({type: 'string' })
     id: string;
     @ApiProperty({type: 'string' })
@@ -14,18 +15,6 @@ export class UserDTO {
     roleId: string;
     @ApiProperty({type: 'string' })
     companyId: string;
-
-    @ApiProperty({type: 'boolean' })
-    isActive: boolean;
-
-    @ApiProperty({type: 'string', example: new Date() })
-    createdAt: Date;
-    @ApiProperty({type: 'string' })
-    createdBy: string;
-    @ApiProperty({type: 'string', example: new Date() })
-    updatedAt: Date;
-    @ApiProperty({type: 'string' })
-    updatedBy: string;
 
     fromUser(data: User): UserDTO {
         const result = new UserDTO();

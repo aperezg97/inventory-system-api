@@ -1,8 +1,8 @@
 export class BaseModel {
-        isActive: boolean;
+    isActive: boolean;
 
     createdAt: Date;
     createdBy: string;
     updatedAt: Date;
-    updatedBy: string;
+    updatedBy?: string;
 }

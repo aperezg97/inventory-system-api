@@ -3,7 +3,7 @@ import { and, asc, eq, or, } from 'drizzle-orm';
 import { InsertUserType } from 'src/core/db/schema.types';
 import { count, gt } from 'drizzle-orm';
 import { ToggleStatusModel } from 'src/core/dtos';
-import { RoleModel, User } from 'src/core/models';
+import { BaseModel, RoleModel, User } from 'src/core/models';
 import { BaseService } from '../base/base.service';
 
 /*
@@ -55,18 +55,18 @@ let userResult: User[] = (await this.dbContext
 export class UsersService extends BaseService {
 
   async findOne(username: string): Promise<User | undefined> {
-    let result = await this.findOneById<User>(username, this.dbSchema.usersTable.username, this.dbSchema.usersTable);
+    let result = await this.findOneById<User>(this.dbSchema.usersTable, this.dbSchema.usersTable.username, username);
     return result;
   }
 
   async findByUsername(username: string, companyId: string): Promise<User | undefined> {
-    let userResult = await this.findOneByIdAndCompany<User>(username, companyId, this.dbSchema.usersTable.username, this.dbSchema.usersTable.companyId, this.dbSchema.usersTable);
+    let userResult = await this.findOneByIdAndCompany<User>(this.dbSchema.usersTable, this.dbSchema.usersTable.username, username, this.dbSchema.usersTable.companyId, companyId);
     if (!userResult) {
       return undefined;
     }
     const user = userResult;
     if (user.roleId) {
-      const roleResult = await this.findOneByIdAndCompany<RoleModel>(username, companyId, this.dbSchema.rolesTable.id, this.dbSchema.rolesTable.companyId, this.dbSchema.rolesTable);
+      const roleResult = await this.findOneByIdAndCompany<RoleModel>(this.dbSchema.rolesTable, this.dbSchema.rolesTable.id, username, this.dbSchema.rolesTable.companyId, companyId);
       if (roleResult) {
         user.role = roleResult;
       }
@@ -155,29 +155,27 @@ export class UsersService extends BaseService {
       email: user.email?.toLowerCase(),
       password: user.password,
       updatedAt: new Date(),
-    };
+    } as User;
 
     if (!user.password || !user.password.length) {
       delete toUpdate.password;
     }
-
-    await this.dbContext.update(this.dbSchema.usersTable)
-      .set(toUpdate)
-      .where(eq(this.dbSchema.usersTable.id, user.id));
-
+    await this.updateOneNonReturning(this.dbSchema.usersTable, toUpdate, this.dbSchema.usersTable.id, existingUser.id);
     return true;
   }
 
   async toggleActiveStatus(userId: string, data: ToggleStatusModel): Promise<boolean | undefined> {
     const existingUser = await this.dbContextQuerySyntax.query.usersTable.findFirst({ where: eq(this.dbSchema.usersTable.id, userId), }) as User;
     if (!existingUser) {
-      throw new BadRequestException('User does not exist!');
+      throw new BadRequestException('Item does not exist!');
     }
 
     const toUpdate = {
       isActive: data.isActive,
-      updated_at: new Date(),
-    };
+      updatedAt: new Date(),
+    } as BaseModel;
+
+    await this.updateOneNonReturning(this.dbSchema.usersTable, toUpdate, this.dbSchema.usersTable.id, existingUser.id);
 
     await this.dbContext.update(this.dbSchema.usersTable)
       .set(toUpdate)

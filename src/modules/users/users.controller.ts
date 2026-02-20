@@ -5,7 +5,6 @@ import { UsersService } from "./users.service";
 import { AuthGuard } from "src/modules/auth/auth.guard";
 import { HttpResponseModel, ToggleStatusModel, UserDTO } from "src/core/dtos";
 import { User } from "src/core/models";
-import { boolean } from "drizzle-orm/gel-core";
 import { randomUUID } from "crypto";
 
 @Controller('api/v1/users')
@@ -67,7 +66,7 @@ export class UsersController {
     @UseGuards(AuthGuard)
     @ApiBearerAuth()
     @ApiBody({ type: ToggleStatusModel })
-    @ApiResponse({ type: boolean })
+    @ApiResponse({ status: 200, description: 'The record has been successfully created.', type: Boolean })
     async toggleActiveStatus(@Param('id') id: string, @Body() data: ToggleStatusModel) {
         const result = await this.usersService.toggleActiveStatus(id, data);
         return HttpResponseModel.okResponse(result);

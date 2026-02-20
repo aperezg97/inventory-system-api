@@ -19,7 +19,7 @@ import { AuthUserProfile } from 'src/core/dtos/auth-user-profile.model';
 import { EmployeesService } from '../employees/employees.service';
 import { EmployeeDTO } from 'src/core/dtos/employee-dto.model';
 import { RequestModel } from 'src/core/models/api';
-import { isUUID } from 'src/utils/helpers';
+import { StringHelper } from 'src/utils/helpers';
 
 @Controller('api/v1/auth')
 @ApiTags('Auth')
@@ -37,7 +37,7 @@ export class AuthController {
     user2: { summary: 'user-2', value: { username: 'maria', password: 'guess', companyId: '00000000-0000-0000-0000-000000000000' } as LoginDTO } as ExampleObject,
   } as ExamplesObject })
   async signIn(@Body() signInDto: LoginDTO): Promise<HttpResponseModel<LoginResponseDTO>> {
-    if (!isUUID(signInDto.companyId ?? '')) {
+    if (!StringHelper.IsValidUUID(signInDto.companyId ?? '')) {
       return HttpResponseModel.badRequestResponse("CompanyId does not have the required format");
     }
     // TODO: improve this

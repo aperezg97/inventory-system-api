@@ -1,1 +1,2 @@
-export * from './string-helper';
+export { AuthHelper } from './auth-helper';
+export { StringHelper } from './string-helper';

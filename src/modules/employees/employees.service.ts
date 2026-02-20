@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { and, asc, eq, or, } from 'drizzle-orm';
+import { and, asc, eq, } from 'drizzle-orm';
 import { InsertUserType } from 'src/core/db/schema.types';
 import { Employee, RoleModel, User } from 'src/core/models';
 import { count, gt } from 'drizzle-orm';
@@ -12,29 +12,29 @@ export class EmployeesService extends BaseService {
   private serviceTable = this.dbSchema.employeesTable;
 
   async findOne(id: string, companyId: string): Promise<Employee | undefined> {
-    let result = await this.findOneByIdAndCompany<Employee>(id, companyId, this.serviceTable.id, this.serviceTable.companyId, this.serviceTable);
+    let result = await this.findOneByIdAndCompany<Employee>(this.serviceTable, this.serviceTable.id, id, this.serviceTable.companyId, companyId);
     return result;
   }
 
   async findByEmail(email: string, companyId: string): Promise<Employee | undefined> {
-    const result = await this.findOneByIdAndCompany<Employee>(email, companyId, this.serviceTable.email, this.serviceTable.companyId, this.serviceTable);
+    const result = await this.findOneByIdAndCompany<Employee>(this.serviceTable,  this.serviceTable.email, email, this.serviceTable.companyId, companyId);
     return result;
   }
 
   async findByUsername(username: string): Promise<Employee | undefined> {
-    const userResult = await this.findOneById<User>(username, this.dbSchema.usersTable.username, this.dbSchema.usersTable);
+    const userResult = await this.findOneById<User>(this.dbSchema.usersTable, this.dbSchema.usersTable.username, username);
     if (!userResult) {
       return undefined;
     }
     delete userResult.password;
     const user = userResult;
     if (user.roleId) {
-      const roleResult = await this.findOneById<RoleModel>(user.roleId, this.dbSchema.rolesTable.id, this.dbSchema.rolesTable);
+      const roleResult = await this.findOneById<RoleModel>(this.dbSchema.rolesTable, this.dbSchema.rolesTable.id, user.roleId);
       if (roleResult) {
         user.role = roleResult;
       }
     }
-    const employeeResult = await this.findOneById<Employee>(user.id, this.dbSchema.employeesTable.userId, this.dbSchema.employeesTable);
+    const employeeResult = await this.findOneById<Employee>(this.dbSchema.employeesTable, this.dbSchema.employeesTable.userId, user.id);
     if (!employeeResult) {
       return undefined;
     }

@@ -22,7 +22,7 @@ export class ErrorsInterceptor implements NestInterceptor {
       .pipe(
         catchError(err => throwError(() => {
             // log exceptions here, maybe send email notifications ?
-            console.error(err);
+            console.error('ErrorInterceptor', err);
             let response = null;
             if (err instanceof BadRequestException) {
                 response = HttpResponseModel.badRequestResponse((err as BadRequestException).message);

@@ -1,25 +1,14 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { RoleModel } from "../models";
+import { BaseDTOModel } from "./base";
 
-export class RoleDTO {
+export class RoleDTO extends BaseDTOModel {
     @ApiProperty({type: 'string' })
     id: string;
     @ApiProperty({type: 'string' })
     name: string;
     @ApiProperty({type: 'string' })
     description: string | undefined;
-
-    @ApiProperty({type: 'boolean' })
-    isActive: boolean;
-
-    @ApiProperty({type: 'string', example: new Date() })
-    createdAt: Date;
-    @ApiProperty({type: 'string' })
-    createdBy: string;
-    @ApiProperty({type: 'string', example: new Date() })
-    updatedAt: Date;
-    @ApiProperty({type: 'string' })
-    updatedBy: string;
 
     fromRole(data: RoleModel): RoleDTO {
         const result = new RoleDTO();
