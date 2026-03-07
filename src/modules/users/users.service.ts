@@ -121,25 +121,13 @@ export class UsersService extends BaseService {
       throw new BadRequestException('User with that email or username already exists!');
     }
 
-    user.createdAt = new Date();
-    user.updatedAt = new Date();
-
     const userData = user as any as InsertUserType;
     userData.email = userData.email?.toLowerCase();
     userData.username = userData.username?.toLowerCase();
     userData.id = undefined;
     userData.isActive = true;
-
-    let result = this.dbContext.insert(this.dbSchema.usersTable)
-      .values(userData)
-      .returning() as any as User;
-    // .returning({ id: this.dbSchema.usersTable.id });
-
-    // const resultFirst = await (await this.dbContextQuerySyntax.insert(this.dbSchema.usersTable).values(userData)).rowCount;
-
+    const result = this.insertOne<User>(this.dbSchema.usersTable, userData);
     return result;
-
-    // return this.users.find((user) => user.username === username);
   }
 
   async update(user: User): Promise<boolean | undefined> {
@@ -156,7 +144,6 @@ export class UsersService extends BaseService {
       password: user.password,
       updatedAt: new Date(),
     } as User;
-
     if (!user.password || !user.password.length) {
       delete toUpdate.password;
     }
@@ -171,15 +158,10 @@ export class UsersService extends BaseService {
     }
 
     const toUpdate = {
-      isActive: data.isActive,
-      updatedAt: new Date(),
+      isActive: data.isActive
     } as BaseModel;
 
     await this.updateOneNonReturning(this.dbSchema.usersTable, toUpdate, this.dbSchema.usersTable.id, existingUser.id);
-
-    await this.dbContext.update(this.dbSchema.usersTable)
-      .set(toUpdate)
-      .where(eq(this.dbSchema.usersTable.id, userId));
 
     return true;
   }

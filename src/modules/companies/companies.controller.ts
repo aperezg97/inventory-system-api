@@ -35,9 +35,7 @@ export class CompaniesController {
   create(@Req() req: RequestModel, @Body() createCompanyDto: CompanyModel) {
     AuthHelper.ValidateLoggedUser(req);
     createCompanyDto.createdBy = req.user.id;
-    createCompanyDto.createdAt = new Date();
     createCompanyDto.updatedBy = undefined;
-    createCompanyDto.updatedAt = new Date();
     const result = this.companiesService.create(createCompanyDto);
     if (!result) {
       return HttpResponseModel.internalServerErrorResponse();
@@ -49,7 +47,6 @@ export class CompaniesController {
   update(@Req() req: RequestModel, @Body() updateCompanyDto: CompanyModel): HttpResponseModel<any> {
     AuthHelper.ValidateLoggedUser(req);
     updateCompanyDto.updatedBy = req.user.id;
-    updateCompanyDto.updatedAt = new Date();
     const result = this.companiesService.update(updateCompanyDto);
     if (!result) {
       return HttpResponseModel.badRequestResponse("Item not found");

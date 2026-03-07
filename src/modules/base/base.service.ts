@@ -3,6 +3,7 @@ import { PgInsertValue, PgTableWithColumns, PgUpdateSetSource } from 'drizzle-or
 import { dbQuerySyntax } from 'src/core/db/connections/drizzle-query-syntax.connections';
 import { db } from 'src/core/db/connections/drizzle.connections';
 import * as schema from 'src/core/db/schema';
+import { BaseModel } from 'src/core/models';
 
 export class BaseService {
     protected dbContext = db;
@@ -34,6 +35,10 @@ export class BaseService {
     }
 
     protected async insertOne<T>(table: PgTableWithColumns<any>, values: PgInsertValue<any>): Promise<T | undefined> {
+        if (values instanceof BaseModel) {
+            values.createdAt = new Date();
+            values.updatedAt = new Date();
+        }
         let result: any = await this.dbContext
             .insert(table)
             .values(values)
@@ -42,6 +47,9 @@ export class BaseService {
     }
 
     protected async updateOne<T>(table: PgTableWithColumns<any>, values: PgUpdateSetSource<any>, idColumn: any, idValue: string): Promise<T | undefined> {
+        if (values instanceof BaseModel) {
+            values.updatedAt = new Date();
+        }
         let result: any = await this.dbContext
             .update(table)
             .set(values)
@@ -51,6 +59,9 @@ export class BaseService {
     }
 
     protected async updateOneNonReturning<T>(table: PgTableWithColumns<any>, values: PgUpdateSetSource<any>, idColumn: any, idValue: string) {
+        if (values instanceof BaseModel) {
+            values.updatedAt = new Date();
+        }
         await this.dbContext
             .update(table)
             .set(values)

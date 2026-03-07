@@ -21,8 +21,6 @@ export class CompaniesService extends BaseService {
   }
 
   async create(createCompanyDto: CompanyModel) {
-    createCompanyDto.createdAt = new Date();
-    createCompanyDto.updatedAt = new Date();
     const result = await this.insertOne<CompanyModel>(this.dbSchema.companiesTable, createCompanyDto);
     return result;
   }
@@ -39,7 +37,6 @@ export class CompaniesService extends BaseService {
     currentItem.phoneNumber = updateCompanyDto.phoneNumber;
     currentItem.logoUrl = updateCompanyDto.logoUrl;
     currentItem.mainBranchOfficeId = updateCompanyDto.mainBranchOfficeId;
-    currentItem.updatedAt = new Date();
     const result = await this.updateOne(this.dbSchema.companiesTable, currentItem, this.dbSchema.companiesTable.id, currentItem.id);
     return result;
   }
