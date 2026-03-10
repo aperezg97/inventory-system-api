@@ -11,6 +11,7 @@ import { EmployeesModule } from './modules/employees/employees.module';
 import { CompaniesModule } from './modules/companies/companies.module';
 import { CacheModule } from './modules/cache/cache.module';
 import { UtilsModule } from './modules/utils/utils.module';
+import { BranchOfficesModule } from './modules/branch-offices/branch-offices.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { UtilsModule } from './modules/utils/utils.module';
           signOptions: { expiresIn: jwtConstants.expiresIn },
         }),
     UtilsModule,
+    BranchOfficesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
