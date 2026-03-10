@@ -1,9 +1,14 @@
 import { HttpStatus } from "@nestjs/common";
+import { ApiProperty } from "@nestjs/swagger";
 
 export class HttpResponseModel<T> {
+    @ApiProperty()
     statusCode: number;
+    @ApiProperty()
     data: T;
+    @ApiProperty()
     errorMessage: string;
+    @ApiProperty()
     successMessage: string;
 
     constructor(_statusCode = 200, _data: T | null = null, _errorMsg: string | null = null) {
