@@ -37,6 +37,7 @@ export class CompaniesService extends BaseService {
     currentItem.phoneNumber = updateCompanyDto.phoneNumber;
     currentItem.logoUrl = updateCompanyDto.logoUrl;
     currentItem.mainBranchOfficeId = updateCompanyDto.mainBranchOfficeId;
+    currentItem.isActive = updateCompanyDto.isActive;
     const result = await this.updateOne(this.dbSchema.companiesTable, currentItem, this.dbSchema.companiesTable.id, currentItem.id);
     return result;
   }
