@@ -4,19 +4,19 @@ import { CompanyModel } from "./company.model";
 
 export class BranchOfficeModel extends BaseModel {
     @ApiProperty()
-    id: string;
+    id!: string;
     @ApiProperty()
-    name: string;
+    name!: string;
     @ApiProperty()
-    address: string;
+    address?: string;
     @ApiProperty()
-    phoneNumber: string;
+    phoneNumber?: string;
     @ApiProperty()
-    logoUrl: string;
+    logoUrl?: string;
     @ApiProperty()
-    notes: string;
+    notes?: string;
     @ApiProperty()
-    companyId: string;
+    companyId!: string;
     @ApiProperty({type: CompanyModel})
     company: CompanyModel | undefined;
 }

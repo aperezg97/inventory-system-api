@@ -1,12 +1,16 @@
-import { Body, Controller, Get, Param, Patch, Post, Put, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Put, Req, UseGuards } from '@nestjs/common';
 import { BranchOfficesService } from './branch-offices.service';
 import { BranchOfficeModel } from 'src/core/models';
 import { HttpResponseModel, ToggleStatusModel } from 'src/core/dtos';
 import { AuthHelper, StringHelper } from 'src/utils/helpers';
 import { RequestModel } from 'src/core/models/api';
-import { ApiBody, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '../auth/auth.guard';
 
-@Controller('branch-offices')
+@ApiTags('BranchOffices')
+@Controller('api/v1/branch-offices')
+@UseGuards(AuthGuard)
+@ApiBearerAuth()
 export class BranchOfficesController {
     constructor(private readonly branchOfficesService: BranchOfficesService) { }
 
