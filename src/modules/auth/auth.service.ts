@@ -26,6 +26,12 @@ export class AuthService {
       throw new UnauthorizedException('Usuario o contraseña incorrectos');
     }
     const employee = await this.employeeService.findByUserID(userMatch.id);
+    if (userMatch.companyId) {
+      const company = await this.usersService.findOneCompany(userMatch.companyId);
+      if (!company || !company.isActive) {
+        throw new UnauthorizedException('Company is not active!');
+      }
+    }
     const payload = { sub: userMatch.id, username: userMatch.username, companyId: userMatch.companyId } as JWTModel;
     delete userMatch.password;
     const accessToken = await this.jwtService.signAsync(payload);

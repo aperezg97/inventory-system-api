@@ -2,14 +2,14 @@ import { ApiProperty } from "@nestjs/swagger";
 
 export class BaseModel {
     @ApiProperty({type: 'boolean' })
-    isActive: boolean;
+    isActive!: boolean;
 
     @ApiProperty()
-    createdAt: Date;
+    createdAt!: Date;
     @ApiProperty()
-    createdBy: string;
+    createdBy!: string;
     @ApiProperty()
-    updatedAt: Date;
+    updatedAt?: Date;
     @ApiProperty()
     updatedBy?: string;
 }

@@ -4,21 +4,21 @@ import { BranchOfficeModel } from "./branch-office.model";
 
 export class CompanyModel extends BaseModel {
     @ApiProperty()
-    id: string;
+    id!: string;
     @ApiProperty()
-    name: string;
+    name!: string;
     @ApiProperty()
-    address: string;
+    address!: string;
     @ApiProperty()
-    rucNumber: string;
+    rucNumber?: string;
     @ApiProperty()
-    dgiLicenseNumber: string;
+    dgiLicenseNumber?: string;
     @ApiProperty()
-    phoneNumber: string;
+    phoneNumber?: string;
     @ApiProperty()
-    logoUrl: string;
+    logoUrl?: string;
     @ApiProperty()
-    mainBranchOfficeId: string;
+    mainBranchOfficeId?: string;
     @ApiProperty({type: BranchOfficeModel})
     mainBranchOffice: BranchOfficeModel | undefined;
 }

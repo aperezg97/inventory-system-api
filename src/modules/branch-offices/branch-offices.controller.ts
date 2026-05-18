@@ -12,12 +12,17 @@ import { AuthGuard } from '../auth/auth.guard';
 @UseGuards(AuthGuard)
 @ApiBearerAuth()
 export class BranchOfficesController {
-    constructor(private readonly branchOfficesService: BranchOfficesService) { }
+    constructor(private readonly branchOfficesService: BranchOfficesService
+    ) { }
 
     @Get()
     @ApiResponse({ status: 200, type: HttpResponseModel<BranchOfficeModel[]> })
     async findAll(@Req() req: RequestModel): Promise<HttpResponseModel<BranchOfficeModel[]>> {
-        const result = await this.branchOfficesService.findAllByCompany(req.companyId);
+        let result = await this.branchOfficesService.findAllByCompany(req.companyId);
+        result = result.map(x => {
+            x.company = x.company || req.user.company;
+            return x;
+        });
         return HttpResponseModel.okResponse(result);
     }
 
@@ -32,11 +37,11 @@ export class BranchOfficesController {
     }
 
     @Post()
-    create(@Req() req: RequestModel, @Body() createCompanyDto: BranchOfficeModel) {
+    async create(@Req() req: RequestModel, @Body() createCompanyDto: BranchOfficeModel): Promise<HttpResponseModel<any>> {
         AuthHelper.ValidateLoggedUser(req);
         createCompanyDto.createdBy = req.user.id;
         createCompanyDto.updatedBy = undefined;
-        const result = this.branchOfficesService.create(createCompanyDto);
+        const result = await this.branchOfficesService.create(createCompanyDto);
         if (!result) {
             return HttpResponseModel.internalServerErrorResponse();
         }
@@ -44,10 +49,10 @@ export class BranchOfficesController {
     }
 
     @Put()
-    update(@Req() req: RequestModel, @Body() updateCompanyDto: BranchOfficeModel): HttpResponseModel<any> {
+    async update(@Req() req: RequestModel, @Body() updateCompanyDto: BranchOfficeModel): Promise<HttpResponseModel<any>> {
         AuthHelper.ValidateLoggedUser(req);
         updateCompanyDto.updatedBy = req.user.id;
-        const result = this.branchOfficesService.update(updateCompanyDto);
+        const result = await this.branchOfficesService.update(updateCompanyDto);
         if (!result) {
             return HttpResponseModel.badRequestResponse("Item not found");
         }
@@ -57,7 +62,7 @@ export class BranchOfficesController {
     @Patch('/update-status/:id')
     @ApiBody({ type: ToggleStatusModel })
     @ApiResponse({ status: 200, description: 'The record has been successfully created.', type: Boolean })
-    async toggleActiveStatus(@Param('id') id: string, @Req() req: RequestModel, @Body() data: ToggleStatusModel) {
+    async toggleActiveStatus(@Param('id') id: string, @Req() req: RequestModel, @Body() data: ToggleStatusModel): Promise<HttpResponseModel<any>> {
         const result = await this.branchOfficesService.toggleActiveStatus(id, req.companyId, data);
         return HttpResponseModel.okResponse(result);
     }

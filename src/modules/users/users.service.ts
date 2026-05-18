@@ -3,7 +3,7 @@ import { and, asc, eq, or, } from 'drizzle-orm';
 import { InsertUserType } from 'src/core/db/schema.types';
 import { count, gt } from 'drizzle-orm';
 import { ToggleStatusModel } from 'src/core/dtos';
-import { BaseModel, RoleModel, User } from 'src/core/models';
+import { BaseModel, CompanyModel, RoleModel, User } from 'src/core/models';
 import { BaseService } from '../base/base.service';
 
 /*
@@ -54,13 +54,16 @@ let userResult: User[] = (await this.dbContext
 @Injectable()
 export class UsersService extends BaseService {
 
+  private usersTable = this.dbSchema.usersTable;
+  private companiesTable = this.dbSchema.companiesTable;
+
   async findOne(username: string): Promise<User | undefined> {
-    let result = await this.findOneById<User>(this.dbSchema.usersTable, this.dbSchema.usersTable.username, username);
+    let result = await this.findOneById<User>(this.usersTable, this.usersTable.username, username);
     return result;
   }
 
   async findByUsername(username: string, companyId: string): Promise<User | undefined> {
-    let userResult = await this.findOneByIdAndCompany<User>(this.dbSchema.usersTable, this.dbSchema.usersTable.username, username, this.dbSchema.usersTable.companyId, companyId);
+    let userResult = await this.findOneByIdAndCompany<User>(this.usersTable, this.usersTable.username, username, this.usersTable.companyId, companyId);
     if (!userResult) {
       return undefined;
     }
@@ -77,23 +80,23 @@ export class UsersService extends BaseService {
   async findAll(): Promise<User[]> {
     const result = (await this.dbContext
       .select({
-        id: this.dbSchema.usersTable.id,
-        email: this.dbSchema.usersTable.email,
-        username: this.dbSchema.usersTable.username,
-        isActive: this.dbSchema.usersTable.isActive,
-        createdAt: this.dbSchema.usersTable.createdAt,
-        createdBy: this.dbSchema.usersTable.createdBy,
-        updatedAt: this.dbSchema.usersTable.updatedAt,
-        updatedBy: this.dbSchema.usersTable.updatedBy,
+        id: this.usersTable.id,
+        email: this.usersTable.email,
+        username: this.usersTable.username,
+        isActive: this.usersTable.isActive,
+        createdAt: this.usersTable.createdAt,
+        createdBy: this.usersTable.createdBy,
+        updatedAt: this.usersTable.updatedAt,
+        updatedBy: this.usersTable.updatedBy,
        })
-      .from(this.dbSchema.usersTable)
-      .orderBy(asc(this.dbSchema.usersTable.username))
+      .from(this.usersTable)
+      .orderBy(asc(this.usersTable.username))
     ) as User[];
     return result.map(x => ({ ...x, password: undefined }));
   }
 
   async findByID(id: string): Promise<User> {
-    const result = await this.dbContextQuerySyntax.query.usersTable.findFirst({ where: eq(this.dbSchema.usersTable.id, id), }) as User;
+    const result = await this.dbContextQuerySyntax.query.usersTable.findFirst({ where: eq(this.usersTable.id, id), }) as User;
     return result;
   }
 
@@ -101,21 +104,21 @@ export class UsersService extends BaseService {
     let whereCondition = user.email ?
       or(
         and(
-          eq(this.dbSchema.usersTable.email, user.email!.toLowerCase()),
-          eq(this.dbSchema.usersTable.companyId, user.companyId),
+          eq(this.usersTable.email, user.email!.toLowerCase()),
+          eq(this.usersTable.companyId, user.companyId),
         ),
         and(
-          eq(this.dbSchema.usersTable.username, user.username.toLowerCase()),
-          eq(this.dbSchema.usersTable.companyId, user.companyId),
+          eq(this.usersTable.username, user.username.toLowerCase()),
+          eq(this.usersTable.companyId, user.companyId),
         ),
       ) :
       and(
-          eq(this.dbSchema.usersTable.username, user.username.toLowerCase()),
-          eq(this.dbSchema.usersTable.companyId, user.companyId),
+          eq(this.usersTable.username, user.username.toLowerCase()),
+          eq(this.usersTable.companyId, user.companyId),
       );
     const userExists = (await this.dbContext
       .select({ count: count() })
-      .from(this.dbSchema.usersTable)
+      .from(this.usersTable)
       .where(whereCondition))[0];
     if (userExists.count > 0) {
       throw new BadRequestException('User with that email or username already exists!');
@@ -126,7 +129,7 @@ export class UsersService extends BaseService {
     userData.username = userData.username?.toLowerCase();
     userData.id = undefined;
     userData.isActive = true;
-    const result = this.insertOne<User>(this.dbSchema.usersTable, userData);
+    const result = this.insertOne<User>(this.usersTable, userData);
     return result;
   }
 
@@ -134,7 +137,7 @@ export class UsersService extends BaseService {
     if (!user.username) {
       throw new BadRequestException('Username is required!');
     }
-    const existingUser = await this.dbContextQuerySyntax.query.usersTable.findFirst({ where: eq(this.dbSchema.usersTable.id, user.id), }) as User;
+    const existingUser = await this.dbContextQuerySyntax.query.usersTable.findFirst({ where: eq(this.usersTable.id, user.id), }) as User;
     if (!existingUser) {
       throw new BadRequestException('User with ID: ' + user.id + ' does not exist!');
     }
@@ -147,12 +150,12 @@ export class UsersService extends BaseService {
     if (!user.password || !user.password.length) {
       delete toUpdate.password;
     }
-    await this.updateOneNonReturning(this.dbSchema.usersTable, toUpdate, this.dbSchema.usersTable.id, existingUser.id);
+    await this.updateOneNonReturning(this.usersTable, toUpdate, this.usersTable.id, existingUser.id);
     return true;
   }
 
   async toggleActiveStatus(userId: string, data: ToggleStatusModel): Promise<boolean | undefined> {
-    const existingUser = await this.dbContextQuerySyntax.query.usersTable.findFirst({ where: eq(this.dbSchema.usersTable.id, userId), }) as User;
+    const existingUser = await this.dbContextQuerySyntax.query.usersTable.findFirst({ where: eq(this.usersTable.id, userId), }) as User;
     if (!existingUser) {
       throw new BadRequestException('Item does not exist!');
     }
@@ -161,8 +164,16 @@ export class UsersService extends BaseService {
       isActive: data.isActive
     } as BaseModel;
 
-    await this.updateOneNonReturning(this.dbSchema.usersTable, toUpdate, this.dbSchema.usersTable.id, existingUser.id);
+    await this.updateOneNonReturning(this.usersTable, toUpdate, this.usersTable.id, existingUser.id);
 
     return true;
+  }
+
+  // # region Employees
+  // Adding region here to avoid circular dependency on Employess and UserModule
+
+  async findOneCompany(id: string): Promise<CompanyModel | undefined> {
+    let result = await this.findOneById<CompanyModel>(this.companiesTable, this.companiesTable.id, id);
+    return result;
   }
 }

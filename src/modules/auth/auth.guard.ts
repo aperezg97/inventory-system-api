@@ -10,7 +10,7 @@ import { Request } from 'express';
 import { JWTModel, RequestModel } from 'src/core/models/api';
 import { UsersService } from '../users/users.service';
 import { CacheService } from '../utils/cache.service';
-import { User } from 'src/core/models';
+import { CompanyModel, User } from 'src/core/models';
 import { Constants } from '../utils/constants';
 
 @Injectable()
@@ -20,7 +20,7 @@ export class AuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
     private userService: UsersService,
-    private cacheService: CacheService
+    private cacheService: CacheService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -41,10 +41,18 @@ export class AuthGuard implements CanActivate {
       const userSessionCacheKeys = [payload.companyId, ...Constants.USER_SESSION_CACHE_KEYS, payload.sub];
       const cachedUserSession = this.cacheService.getFromCache<User>(userSessionCacheKeys);
       let user!: User;
+      let company: CompanyModel | undefined;
       if (cachedUserSession) {
         user = cachedUserSession;
       } else {
         user = await this.userService.findByID(payload.sub);
+        if (user.companyId) {
+          company = await this.userService.findOneCompany(user.companyId);
+          if (!company || !company.isActive) {
+            throw new UnauthorizedException('Company is not active!');
+          }
+          user.company = company;
+        }
       }
       if (!user) {
         throw new UnauthorizedException();

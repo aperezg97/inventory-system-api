@@ -12,7 +12,7 @@ import {
 import { AuthService } from './auth.service';
 import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from './auth.guard';
-import { HttpResponseModel, LoginDTO, UserDTO } from 'src/core/dtos';
+import { HttpResponseModel, LoginDTO, UserDTO, CompanyDTO } from 'src/core/dtos';
 import { ExampleObject, ExamplesObject } from '@nestjs/swagger/dist/interfaces/open-api-spec.interface';
 import { LoginResponseDTO } from 'src/core/dtos/login-response.model';
 import { AuthUserProfile } from 'src/core/dtos/auth-user-profile.model';
@@ -20,6 +20,7 @@ import { EmployeesService } from '../employees/employees.service';
 import { EmployeeDTO } from 'src/core/dtos/employee-dto.model';
 import { RequestModel } from 'src/core/models/api';
 import { StringHelper } from 'src/utils/helpers';
+import { UsersService } from '../users/users.service';
 
 @Controller('api/v1/auth')
 @ApiTags('Auth')
@@ -27,6 +28,7 @@ export class AuthController {
   constructor(
     private authService: AuthService,
     private employeesService: EmployeesService,
+    private usersService: UsersService
   ) {}
 
   @HttpCode(HttpStatus.OK)
@@ -77,9 +79,11 @@ export class AuthController {
     }
     const user = req.user;
     const employeeInfo = await this.employeesService.findByUserID(user.id);
+    const company = await this.usersService.findOneCompany(user.companyId);
     return {
       employee: employeeInfo ? new EmployeeDTO().fromEmployee(employeeInfo) : null,
       user: user ? new UserDTO().fromUser(user) : null,
+      company: company ? new CompanyDTO().fromCompany(company) : null,
       iat: req.iat,
       exp: req.exp,
     } as AuthUserProfile;

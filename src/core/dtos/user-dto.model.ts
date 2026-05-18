@@ -4,17 +4,17 @@ import { BaseDTOModel } from "./base";
 
 export class UserDTO extends BaseDTOModel {
     @ApiProperty({type: 'string' })
-    id: string;
+    id!: string;
     @ApiProperty({type: 'string' })
-    username: string;
+    username!: string;
     @ApiProperty({type: 'string' })
     email: string | undefined;
     @ApiProperty({type: 'string' })
     password: string | undefined;
     @ApiProperty({type: 'string' })
-    roleId: string;
+    roleId?: string;
     @ApiProperty({type: 'string' })
-    companyId: string;
+    companyId!: string;
 
     fromUser(data: User): UserDTO {
         const result = new UserDTO();

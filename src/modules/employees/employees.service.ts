@@ -9,15 +9,15 @@ import { BaseService } from '../base/base.service';
 @Injectable()
 export class EmployeesService extends BaseService {
 
-  private serviceTable = this.dbSchema.employeesTable;
+  private employeesTable = this.dbSchema.employeesTable;
 
   async findOne(id: string, companyId: string): Promise<Employee | undefined> {
-    let result = await this.findOneByIdAndCompany<Employee>(this.serviceTable, this.serviceTable.id, id, this.serviceTable.companyId, companyId);
+    let result = await this.findOneByIdAndCompany<Employee>(this.employeesTable, this.employeesTable.id, id, this.employeesTable.companyId, companyId);
     return result;
   }
 
   async findByEmail(email: string, companyId: string): Promise<Employee | undefined> {
-    const result = await this.findOneByIdAndCompany<Employee>(this.serviceTable,  this.serviceTable.email, email, this.serviceTable.companyId, companyId);
+    const result = await this.findOneByIdAndCompany<Employee>(this.employeesTable,  this.employeesTable.email, email, this.employeesTable.companyId, companyId);
     return result;
   }
 
@@ -46,29 +46,29 @@ export class EmployeesService extends BaseService {
   async findAll(): Promise<Employee[]> {
     const result = (await this.dbContext
       .select()
-      .from(this.serviceTable)
-      .orderBy(asc(this.serviceTable.firstName), asc(this.serviceTable.lastName))
+      .from(this.employeesTable)
+      .orderBy(asc(this.employeesTable.firstName), asc(this.employeesTable.lastName))
     ) as any[] as Employee[];
     return result;
   }
 
   async findByID(id: string): Promise<Employee> {
-    const result = await this.dbContextQuerySyntax.query.employeesTable.findFirst({ where: eq(this.serviceTable.id, id), }) as any as Employee;
+    const result = await this.dbContextQuerySyntax.query.employeesTable.findFirst({ where: eq(this.employeesTable.id, id), }) as any as Employee;
     return result;
   }
 
   async findByUserID(userId: string): Promise<Employee> {
-    const result = await this.dbContextQuerySyntax.query.employeesTable.findFirst({ where: eq(this.serviceTable.userId, userId), }) as any as Employee;
+    const result = await this.dbContextQuerySyntax.query.employeesTable.findFirst({ where: eq(this.employeesTable.userId, userId), }) as any as Employee;
     return result;
   }
 
   async insert(data: Employee): Promise<Employee | undefined> {
     const employeeExists = (await this.dbContext
       .select({ count: count() })
-      .from(this.serviceTable)
+      .from(this.employeesTable)
       .where(and(
-        eq(this.serviceTable.email, data.email.toLowerCase()),
-        eq(this.serviceTable.companyId, data.companyId),
+        eq(this.employeesTable.email, data.email.toLowerCase()),
+        eq(this.employeesTable.companyId, data.companyId),
     )))[0];
     if (employeeExists.count > 0) {
       throw new BadRequestException('Employee with that email or username already exists!');
@@ -104,7 +104,7 @@ export class EmployeesService extends BaseService {
   }
 
   async update(data: Employee): Promise<boolean | undefined> {
-    const existingUser = await this.dbContextQuerySyntax.query.employeesTable.findFirst({ where: eq(this.serviceTable.id, data.id) }) as Employee;
+    const existingUser = await this.dbContextQuerySyntax.query.employeesTable.findFirst({ where: eq(this.employeesTable.id, data.id) }) as Employee;
     if (!existingUser) {
       throw new BadRequestException('User with ID: ' + data.id + ' does not exist!');
     }
@@ -120,15 +120,15 @@ export class EmployeesService extends BaseService {
       updatedAt: new Date(),
     };
 
-    await this.dbContext.update(this.serviceTable)
+    await this.dbContext.update(this.employeesTable)
       .set(toUpdate)
-      .where(eq(this.serviceTable.id, data.id));
+      .where(eq(this.employeesTable.id, data.id));
 
     return true;
   }
 
   async toggleActiveStatus(employeeId: string, data: ToggleStatusModel): Promise<boolean | undefined> {
-    const existing = await this.dbContextQuerySyntax.query.employeesTable.findFirst({ where: eq(this.serviceTable.id, employeeId), }) as Employee;
+    const existing = await this.dbContextQuerySyntax.query.employeesTable.findFirst({ where: eq(this.employeesTable.id, employeeId), }) as Employee;
     if (!existing) {
       throw new BadRequestException('Employee does not exist!');
     }
@@ -138,9 +138,9 @@ export class EmployeesService extends BaseService {
       updatedAt: new Date(),
     };
 
-    await this.dbContext.update(this.serviceTable)
+    await this.dbContext.update(this.employeesTable)
       .set(toUpdate)
-      .where(eq(this.serviceTable.id, employeeId));
+      .where(eq(this.employeesTable.id, employeeId));
 
     return true;
   }
